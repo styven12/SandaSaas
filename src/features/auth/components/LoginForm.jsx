@@ -1,0 +1,1 @@
+export default function LoginForm() { return <form><input name="email" type="email" placeholder="Email" /><input name="password" type="password" placeholder="Mot de passe" /><button type="submit">Se connecter</button></form> }

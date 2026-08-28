@@ -1,3 +1,13 @@
+## Deploiement sur Vercel
+
+1. Importer ce depot dans Vercel.
+2. Laisser le framework detecte comme `Vite`.
+3. Definir la commande de build : `npm run build`.
+4. Definir le dossier de sortie : `dist`.
+5. Ajouter `VITE_API_BASE_URL` et `VITE_APP_DOMAIN` dans Project Settings > Environment Variables.
+6. Deployer avec l'environnement `Production` selectionne.
+
+Le fichier `vercel.json` gere le fallback des routes React Router apres actualisation.
 wifisanda-frontend/
 ├── public/
 │   ├── favicon.ico

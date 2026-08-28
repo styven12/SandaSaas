@@ -3,13 +3,19 @@ import API from './api';
 export const smsService = {
   // Récupérer le solde actuel et les forfaits SMS disponibles
   getSmsStoreInfo: async () => {
-    const response = await API.get('/sms/store');
-    return response.data;
+    const response = await API.get('/sms/packs');
+    return {
+      ...response.data,
+      balance: response.data.balance ?? response.data.sms_balance ?? 0,
+    };
   },
 
   // Acheter un pack de SMS via Mobile Money
   buySmsPack: async (purchaseData) => {
-    const response = await API.post('/sms/buy', purchaseData);
+    const response = await API.post('/sms/buy-pack', {
+      pack_key: purchaseData.pack_key || purchaseData.packId,
+      phone: purchaseData.phone,
+    });
     return response.data;
   }
 };

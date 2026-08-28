@@ -78,7 +78,7 @@ export default function CaptivePortalPage() {
       setStep('PAYING');
       
       // Polling de vérification du statut du paiement Mobile Money (max 45 secondes)
-      pollTransactionStatus(res.transactionId);
+      pollTransactionStatus(res.reference);
     } catch (err) {
       setError(err.response?.data?.error || "Échec de l'initialisation du paiement.");
       setPaymentLoading(false);
@@ -91,12 +91,12 @@ export default function CaptivePortalPage() {
       attempts += 1;
       try {
         const res = await portalService.checkPaymentStatus(txId);
-        if (res.status === 'SUCCESS' || res.status === 'PAID') {
+        if (res.status === 'complete') {
           clearInterval(interval);
           setPurchasedTicket(res.ticket);
           setStep('SUCCESS');
           setPaymentLoading(false);
-        } else if (res.status === 'FAILED') {
+        } else if (res.status === 'failed') {
           clearInterval(interval);
           setError("Paiement échoué ou annulé sur votre téléphone.");
           setStep('SELECT_PLAN');

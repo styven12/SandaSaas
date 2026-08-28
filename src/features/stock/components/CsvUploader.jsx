@@ -27,7 +27,7 @@ export default function CsvUploader({ zones, onUploadSuccess, onClose }) {
 
     const formData = new FormData();
     formData.append('file', file);
-    if (selectedZone) formData.append('zoneId', selectedZone);
+    if (selectedZone) formData.append('zone_id', selectedZone);
 
     try {
       const res = await stockService.uploadCsv(formData);

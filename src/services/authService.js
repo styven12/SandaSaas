@@ -3,7 +3,10 @@ import API from './api';
 export const authService = {
   // Inscription d'un nouveau gérant
   register: async (data) => {
-    const response = await API.post('/auth/register', data);
+    const response = await API.post('/auth/register', {
+      ...data,
+      phone_payout: data.phone_payout || data.phone,
+    });
     return response.data;
   },
 

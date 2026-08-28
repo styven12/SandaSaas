@@ -9,19 +9,23 @@ export const portalService = {
 
   // Demande l'envoi d'un code OTP par SMS
   requestOtp: async (phone, zoneId) => {
-    const response = await API.post('/portal/request-otp', { phone, zoneId });
+    const response = await API.post('/otp/request-otp', { phone, zone_id: zoneId });
     return response.data;
   },
 
   // Initier le paiement Mobile Money
   initiatePayment: async (paymentData) => {
-    const response = await API.post('/portal/pay', paymentData);
+    const response = await API.post('/payments/initiate', {
+      plan_id: paymentData.plan_id || paymentData.planId,
+      phone: paymentData.phone,
+      email: paymentData.email,
+    });
     return response.data;
   },
 
   // Vérifier le statut de la transaction (Polling)
   checkPaymentStatus: async (transactionId) => {
-    const response = await API.get(`/portal/status/${transactionId}`);
+    const response = await API.get(`/payments/status/${transactionId}`);
     return response.data;
   }
 };

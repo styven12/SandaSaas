@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import API from '../../../services/api';
+import React, { useState, useRef } from 'react';
 import { stockService } from '../../../services/stockService';
 import {
   UploadCloud,
@@ -19,6 +18,9 @@ const EMPTY_ROW = {
   duration: '',
 };
 
+/**
+ * Parse une ligne CSV en respectant les champs entre guillemets.
+ */
 const parseCsvLine = (line = '') => {
   const values = [];
   let current = '';
@@ -51,6 +53,9 @@ const parseCsvLine = (line = '') => {
   return values;
 };
 
+/**
+ * Normalise les noms des colonnes CSV.
+ */
 const normalizeHeader = (value = '') =>
   String(value)
     .trim()
@@ -58,6 +63,9 @@ const normalizeHeader = (value = '') =>
     .replace(/^\uFEFF/, '')
     .replace(/[^a-z0-9]/g, '');
 
+/**
+ * Parse le contenu CSV.
+ */
 const parseCsvRows = (csvText = '') => {
   const rows = csvText
     .split(/\r?\n/)
@@ -69,7 +77,6 @@ const parseCsvRows = (csvText = '') => {
   }
 
   const headers = parseCsvLine(rows[0]).map(normalizeHeader);
-
   const parsed = [];
 
   for (let i = 1; i < rows.length; i += 1) {
@@ -124,6 +131,9 @@ const parseCsvRows = (csvText = '') => {
   return parsed;
 };
 
+/**
+ * Transforme les lignes manuelles en CSV.
+ */
 const buildCsvFromRows = (items = []) => {
   const validItems = items.filter(
     (item) =>
@@ -173,137 +183,12 @@ export default function CsvUploader({
     zones[0]?._id || zones[0]?.id || ''
   );
 
-  const [plans, setPlans] = useState([]);
-  const [selectedPlan, setSelectedPlan] = useState(null);
-
   const [loading, setLoading] = useState(false);
-  const [plansLoading, setPlansLoading] = useState(false);
-
-  const [newPlanName, setNewPlanName] = useState('');
-  const [newPlanPrice, setNewPlanPrice] = useState('');
-  const [creatingPlan, setCreatingPlan] = useState(false);
 
   const [message, setMessage] = useState(null);
 
-  /*
-   * Chargement des forfaits
-   */
-  useEffect(() => {
-    const loadPlans = async () => {
-      if (!selectedZone) {
-        setPlans([]);
-        setSelectedPlan(null);
-        return;
-      }
-
-      try {
-        setPlansLoading(true);
-        setMessage(null);
-
-        const response = await API.get(
-          `/plans/zone/${selectedZone}`
-        );
-
-        const zonePlans = Array.isArray(response.data)
-          ? response.data
-          : [];
-
-        setPlans(zonePlans);
-
-        setSelectedPlan(zonePlans[0] || null);
-      } catch (err) {
-        console.error(
-          'Erreur chargement plans:',
-          err
-        );
-
-        setPlans([]);
-        setSelectedPlan(null);
-
-        setMessage({
-          type: 'error',
-          text:
-            err.response?.data?.error ||
-            err.response?.data?.message ||
-            'Impossible de charger les forfaits de cette zone.',
-        });
-      } finally {
-        setPlansLoading(false);
-      }
-    };
-
-    loadPlans();
-  }, [selectedZone]);
-
-  /*
-   * Créer un forfait
-   */
-  const handleCreatePlan = async (e) => {
-    e.preventDefault();
-
-    if (!newPlanName.trim() || !newPlanPrice.trim()) {
-      setMessage({
-        type: 'error',
-        text: 'Veuillez remplir le nom et le prix du forfait.',
-      });
-      return;
-    }
-
-    setCreatingPlan(true);
-
-    try {
-      const zoneId =
-        selectedZone?._id || selectedZone?.id;
-
-      const response =
-        await stockService.createPlan(
-          zoneId,
-          newPlanName.trim(),
-          parseFloat(newPlanPrice)
-        );
-
-      setNewPlanName('');
-      setNewPlanPrice('');
-
-      setMessage({
-        type: 'success',
-        text: `Forfait "${response.plan.name}" créé avec succès !`,
-      });
-
-      // Recharger les forfaits
-      setPlansLoading(true);
-      const updatedPlans =
-        await stockService.getPlansByZone(
-          zoneId
-        );
-      setPlans(updatedPlans);
-
-      if (updatedPlans.length > 0) {
-        setSelectedPlan(
-          updatedPlans[0]
-        );
-      }
-    } catch (err) {
-      console.error(
-        'Erreur création forfait:',
-        err
-      );
-
-      setMessage({
-        type: 'error',
-        text:
-          err.response?.data?.error ||
-          err.response?.data?.message ||
-          'Erreur lors de la création du forfait.',
-      });
-    } finally {
-      setCreatingPlan(false);
-      setPlansLoading(false);
-    }
-  };
-
-  /*
-   * Modification d'une ligne
+  /**
+   * Modifier une ligne.
    */
   const updateRow = (index, field, value) => {
     setRows((prev) =>
@@ -318,8 +203,8 @@ export default function CsvUploader({
     );
   };
 
-  /*
-   * Ajouter une ligne
+  /**
+   * Ajouter une ligne.
    */
   const addRow = () => {
     setRows((prev) => [
@@ -328,8 +213,8 @@ export default function CsvUploader({
     ]);
   };
 
-  /*
-   * Supprimer une ligne
+  /**
+   * Supprimer une ligne.
    */
   const removeRow = (index) => {
     if (rows.length === 1) {
@@ -344,12 +229,11 @@ export default function CsvUploader({
     );
   };
 
-  /*
-   * Sélection du fichier CSV
+  /**
+   * Importer un fichier CSV.
    */
   const handleFileChange = async (e) => {
-    const selectedFile =
-      e.target.files?.[0];
+    const selectedFile = e.target.files?.[0];
 
     if (!selectedFile) {
       return;
@@ -362,10 +246,7 @@ export default function CsvUploader({
 
     if (!fileName.endsWith('.csv')) {
       setFile(null);
-
-      setRows([
-        { ...EMPTY_ROW },
-      ]);
+      setRows([{ ...EMPTY_ROW }]);
 
       if (inputRef.current) {
         inputRef.current.value = '';
@@ -382,10 +263,7 @@ export default function CsvUploader({
 
     if (selectedFile.size > 5 * 1024 * 1024) {
       setFile(null);
-
-      setRows([
-        { ...EMPTY_ROW },
-      ]);
+      setRows([{ ...EMPTY_ROW }]);
 
       if (inputRef.current) {
         inputRef.current.value = '';
@@ -409,10 +287,7 @@ export default function CsvUploader({
 
       if (parsedRows.length === 0) {
         setFile(null);
-
-        setRows([
-          { ...EMPTY_ROW },
-        ]);
+        setRows([{ ...EMPTY_ROW }]);
 
         setMessage({
           type: 'error',
@@ -444,10 +319,7 @@ export default function CsvUploader({
       );
 
       setFile(null);
-
-      setRows([
-        { ...EMPTY_ROW },
-      ]);
+      setRows([{ ...EMPTY_ROW }]);
 
       setMessage({
         type: 'error',
@@ -457,15 +329,12 @@ export default function CsvUploader({
     }
   };
 
-  /*
-   * Supprimer le fichier
+  /**
+   * Supprimer le fichier.
    */
   const handleRemoveFile = () => {
     setFile(null);
-
-    setRows([
-      { ...EMPTY_ROW },
-    ]);
+    setRows([{ ...EMPTY_ROW }]);
 
     if (inputRef.current) {
       inputRef.current.value = '';
@@ -474,16 +343,26 @@ export default function CsvUploader({
     setMessage(null);
   };
 
-  /*
-   * Vérifie les entrées manuelles
+  /**
+   * Tickets valides.
    */
-  const hasManualEntries = rows.some(
-    (row) =>
-      String(row.code || '').trim() &&
-      String(row.password || '').trim()
-  );
+  const normalizedRows = rows
+    .map((row) => ({
+      code: String(row.code || '').trim(),
+      password: String(row.password || '').trim(),
+      profile: String(row.profile || 'default').trim(),
+      duration: String(row.duration || '').trim(),
+    }))
+    .filter(
+      (row) =>
+        row.code &&
+        row.password
+    );
 
-  /*
+  const hasValidTickets =
+    normalizedRows.length > 0;
+
+  /**
    * IMPORTATION
    */
   const handleSubmit = async (e) => {
@@ -494,33 +373,6 @@ export default function CsvUploader({
     );
 
     setMessage(null);
-
-    /*
-     * Récupérer uniquement les lignes valides
-     */
-    const normalizedRows = rows
-      .map((row) => ({
-        code: String(
-          row.code || ''
-        ).trim(),
-
-        password: String(
-          row.password || ''
-        ).trim(),
-
-        profile: String(
-          row.profile || 'default'
-        ).trim(),
-
-        duration: String(
-          row.duration || ''
-        ).trim(),
-      }))
-      .filter(
-        (row) =>
-          row.code &&
-          row.password
-      );
 
     console.log(
       'Tickets valides:',
@@ -537,29 +389,8 @@ export default function CsvUploader({
       selectedZone
     );
 
-    console.log(
-      'Forfait:',
-      selectedPlan
-    );
-
-    /*
-     * Vérification des tickets
-     */
-    if (
-      normalizedRows.length === 0 &&
-      !file
-    ) {
-      setMessage({
-        type: 'error',
-        text:
-          'Ajoutez au moins un ticket avec code + password ou sélectionnez un fichier CSV.',
-      });
-
-      return;
-    }
-
-    /*
-     * Vérification zone
+    /**
+     * Vérification zone.
      */
     if (!selectedZone) {
       setMessage({
@@ -571,28 +402,14 @@ export default function CsvUploader({
       return;
     }
 
-    /*
-     * Vérification forfait
+    /**
+     * Vérification tickets.
      */
-    if (!selectedPlan) {
+    if (!hasValidTickets && !file) {
       setMessage({
         type: 'error',
         text:
-          'Aucun forfait disponible pour cette zone. Créez d’abord un forfait.',
-      });
-
-      return;
-    }
-
-    const planId =
-      selectedPlan._id ||
-      selectedPlan.id;
-
-    if (!planId) {
-      setMessage({
-        type: 'error',
-        text:
-          'Impossible de récupérer l’identifiant du forfait.',
+          'Ajoutez au moins un ticket avec code + password ou sélectionnez un fichier CSV.',
       });
 
       return;
@@ -601,12 +418,11 @@ export default function CsvUploader({
     try {
       setLoading(true);
 
-      /*
-       * Construire le fichier à envoyer
+      /**
+       * Si des lignes sont saisies manuellement,
+       * elles deviennent le CSV à envoyer.
        *
-       * Si des tickets sont présents dans
-       * les lignes du formulaire, on crée
-       * un nouveau CSV.
+       * Sinon, on utilise directement le fichier.
        */
       let fileToUpload = file;
 
@@ -617,14 +433,15 @@ export default function CsvUploader({
           );
 
         console.log(
-          'CSV envoyé:',
+          '📄 CSV généré:',
           csvPayload
         );
 
         const blob = new Blob(
           [csvPayload],
           {
-            type: 'text/csv;charset=utf-8',
+            type:
+              'text/csv;charset=utf-8',
           }
         );
 
@@ -639,8 +456,8 @@ export default function CsvUploader({
         );
       }
 
-      /*
-       * Vérification finale
+      /**
+       * Vérification finale.
        */
       if (!fileToUpload) {
         setMessage({
@@ -652,8 +469,11 @@ export default function CsvUploader({
         return;
       }
 
-      /*
-       * FormData
+      /**
+       * FormData.
+       *
+       * IMPORTANT :
+       * Il n'y a plus de plan_id.
        */
       const formData =
         new FormData();
@@ -668,11 +488,6 @@ export default function CsvUploader({
         selectedZone
       );
 
-      formData.append(
-        'plan_id',
-        planId
-      );
-
       console.log(
         '📤 Envoi FormData:',
         {
@@ -680,13 +495,11 @@ export default function CsvUploader({
             fileToUpload.name,
           zone_id:
             selectedZone,
-          plan_id:
-            planId,
         }
       );
 
-      /*
-       * Appel backend
+      /**
+       * Appel backend.
        */
       const res =
         await stockService.uploadCsv(
@@ -698,8 +511,8 @@ export default function CsvUploader({
         res
       );
 
-      /*
-       * Message succès
+      /**
+       * Succès.
        */
       setMessage({
         type: 'success',
@@ -710,8 +523,8 @@ export default function CsvUploader({
             0} ticket(s) importé(s) avec succès !`,
       });
 
-      /*
-       * Reset
+      /**
+       * Reset.
        */
       setFile(null);
 
@@ -723,8 +536,8 @@ export default function CsvUploader({
         inputRef.current.value = '';
       }
 
-      /*
-       * Callback parent
+      /**
+       * Callback parent.
        */
       if (
         typeof onUploadSuccess ===
@@ -761,13 +574,13 @@ export default function CsvUploader({
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
 
       {/* HEADER */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 className="font-semibold text-slate-100 text-sm flex items-center gap-2">
           <UploadCloud className="w-4 h-4 text-blue-400" />
-          Importer des Tickets MikroTik (CSV)
+          Importer des Tickets MikroTik
         </h3>
 
         {onClose && (
@@ -807,37 +620,41 @@ export default function CsvUploader({
         className="space-y-5"
       >
 
-        {/* ÉTAPE 1 : SÉLECTION ZONE */}
+        {/* =========================
+            ÉTAPE 1 : ZONE
+        ========================== */}
         {zones.length > 0 && (
           <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-3">
+
             <div className="flex items-center gap-3">
-              <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white flex-shrink-0">
+
+              <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
                 1
               </div>
+
               <div>
                 <label className="block text-sm font-semibold text-slate-200">
                   Sélectionnez une Zone
                 </label>
+
                 <p className="text-[11px] text-slate-400 mt-0.5">
                   Choisissez la zone où importer les tickets
                 </p>
               </div>
+
             </div>
 
             <select
               value={selectedZone}
-              onChange={(e) => {
+              onChange={(e) =>
                 setSelectedZone(
                   e.target.value
-                );
-
-                setSelectedPlan(
-                  null
-                );
-              }}
+                )
+              }
               disabled={loading}
-              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50 transition"
+              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
             >
+
               <option value="">
                 -- Choisir une zone --
               </option>
@@ -856,201 +673,50 @@ export default function CsvUploader({
                   </option>
                 );
               })}
+
             </select>
 
             {selectedZone && (
               <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                Zone sélectionnée avec succès
+                Zone sélectionnée
               </div>
             )}
+
           </div>
         )}
 
-        {/* ÉTAPE 2 : SÉLECTION FORFAIT */}
-        {selectedZone && (
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white flex-shrink-0">
-                2
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-200">
-                  Sélectionnez le Forfait
-                </label>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Choisissez le forfait pour ces tickets
-                </p>
-              </div>
-            </div>
-
-            {plansLoading ? (
-              <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                Chargement des forfaits…
-              </div>
-            ) : plans.length > 0 ? (
-              <>
-                <select
-                  value={
-                    selectedPlan?._id ||
-                    selectedPlan?.id ||
-                    ''
-                  }
-                  onChange={(e) => {
-                    const plan =
-                      plans.find(
-                        (p) =>
-                          (p._id ||
-                            p.id) ===
-                          e.target.value
-                      );
-
-                    setSelectedPlan(
-                      plan || null
-                    );
-                  }}
-                  disabled={loading}
-                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50 transition"
-                >
-                  <option value="">
-                    -- Choisir un
-                    forfait --
-                  </option>
-
-                  {plans.map(
-                    (plan) => {
-                      const planId =
-                        plan._id ||
-                        plan.id;
-
-                      return (
-                        <option
-                          key={planId}
-                          value={planId}
-                        >
-                          {plan.name} —{' '}
-                          {plan.price}{' '}
-                          FCFA
-                        </option>
-                      );
-                    }
-                  )}
-                </select>
-
-                {selectedPlan && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Forfait
-                    sélectionné
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="space-y-3">
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <span>Aucun forfait trouvé pour cette zone. Créez-en un maintenant.</span>
-                </div>
-
-                <form
-                  onSubmit={
-                    handleCreatePlan
-                  }
-                  className="p-4 rounded-xl bg-slate-800/50 border border-slate-700 space-y-3"
-                >
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-300 mb-1.5">
-                      Nom du forfait
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ex: Basic, Premium, Pro"
-                      value={
-                        newPlanName
-                      }
-                      onChange={(e) =>
-                        setNewPlanName(
-                          e.target
-                            .value
-                        )
-                      }
-                      disabled={
-                        creatingPlan
-                      }
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 disabled:opacity-50"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-300 mb-1.5">
-                      Prix (FCFA)
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="Ex: 5000"
-                      value={
-                        newPlanPrice
-                      }
-                      onChange={(e) =>
-                        setNewPlanPrice(
-                          e.target
-                            .value
-                        )
-                      }
-                      disabled={
-                        creatingPlan
-                      }
-                      min="0"
-                      step="100"
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 disabled:opacity-50"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={
-                      creatingPlan ||
-                      !newPlanName.trim() ||
-                      !newPlanPrice.trim()
-                    }
-                    className="w-full py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs rounded-lg flex items-center justify-center gap-2 transition"
-                  >
-                    {creatingPlan && (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    )}
-                    {creatingPlan
-                      ? 'Création en cours…'
-                      : '+ Créer le forfait'}
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ÉTAPE 3 : IMPORTER CSV OU AJOUTER MANUELLEMENT */}
+        {/* =========================
+            ÉTAPE 2 : TICKETS
+        ========================== */}
         <div className="space-y-4">
+
           <div className="flex items-center gap-3">
-            <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white flex-shrink-0">
-              3
+
+            <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+              2
             </div>
+
             <div>
               <label className="block text-sm font-semibold text-slate-200">
-                Importer les Tickets
+                Ajouter les Tickets
               </label>
+
               <p className="text-[11px] text-slate-400 mt-0.5">
-                Choisissez un fichier CSV ou ajoutez les tickets manuellement
+                Importez un CSV ou saisissez les tickets manuellement
               </p>
             </div>
+
           </div>
 
-          {/* CSV Upload */}
+          {/* CSV */}
           <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+
             <label
               htmlFor="csv-upload"
               className="border-2 border-dashed border-slate-700 hover:border-slate-600 bg-slate-900 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition"
             >
+
               <FileText className="w-8 h-8 text-slate-500" />
 
               <span className="text-sm text-slate-300 font-medium text-center">
@@ -1060,9 +726,8 @@ export default function CsvUploader({
               </span>
 
               <span className="text-[11px] text-slate-400 text-center">
-                Format accepté :
-                code, password,
-                profile, duration
+                Format :
+                code, password, profile, duration
               </span>
 
               {file && (
@@ -1089,18 +754,23 @@ export default function CsvUploader({
                 }
                 className="hidden"
               />
+
             </label>
+
           </div>
 
-          {/* ENTRÉES MANUELLES */}
+          {/* MANUEL */}
           <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-3">
+
             <div className="flex items-center justify-between">
+
               <div>
                 <label className="text-sm font-semibold text-slate-200">
-                  Ou ajoutez manuellement
+                  Saisie manuelle
                 </label>
+
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  Ajouter des tickets ligne par ligne
+                  Ajoutez chaque ticket ligne par ligne
                 </p>
               </div>
 
@@ -1108,228 +778,220 @@ export default function CsvUploader({
                 type="button"
                 onClick={addRow}
                 disabled={loading}
-                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-[11px] font-semibold text-white hover:bg-emerald-500 disabled:opacity-50 transition"
+                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-[11px] font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
                 Ajouter une ligne
               </button>
+
             </div>
 
-            {rows.length > 0 && (
-              <div className="text-[11px] text-slate-400 px-2">
-                {rows.filter(
-                  (row) =>
-                    String(
-                      row.code
-                    ).trim() &&
-                    String(
-                      row.password
-                    ).trim()
-                ).length > 0
-                  ? `${rows.filter(
-                      (row) =>
-                        String(
-                          row.code
-                        ).trim() &&
-                        String(
-                          row.password
-                        ).trim()
-                    ).length} ticket(s) valide(s)`
-                  : 'Aucun ticket valide (code + password requis)'}
-              </div>
-            )}
+            {/* COMPTEUR */}
+            <div className="text-[11px] text-slate-400 px-2">
 
+              {normalizedRows.length > 0
+                ? `${normalizedRows.length} ticket(s) valide(s)`
+                : 'Aucun ticket valide'}
+
+            </div>
+
+            {/* LIGNES */}
             <div className="space-y-2">
+
               {rows.map(
                 (row, index) => (
                   <div
                     key={`row-${index}`}
                     className="grid grid-cols-1 gap-2 rounded-xl border border-slate-700 bg-slate-800 p-3 md:grid-cols-5"
                   >
-                <input
-                  type="text"
-                  placeholder="code"
-                  value={row.code}
-                  onChange={(e) =>
-                    updateRow(
-                      index,
-                      'code',
-                      e.target.value
-                    )
-                  }
-                  disabled={loading}
-                  className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
-                />
 
-                <input
-                  type="text"
-                  placeholder="password"
-                  value={
-                    row.password
-                  }
-                  onChange={(e) =>
-                    updateRow(
-                      index,
-                      'password',
-                      e.target.value
-                    )
-                  }
-                  disabled={loading}
-                  className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
-                />
+                    {/* CODE */}
+                    <input
+                      type="text"
+                      placeholder="Code"
+                      value={row.code}
+                      onChange={(e) =>
+                        updateRow(
+                          index,
+                          'code',
+                          e.target.value
+                        )
+                      }
+                      disabled={loading}
+                      className="px-2 py-2 bg-slate-900 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    />
 
-                <input
-                  type="text"
-                  placeholder="profile"
-                  value={
-                    row.profile
-                  }
-                  onChange={(e) =>
-                    updateRow(
-                      index,
-                      'profile',
-                      e.target.value
-                    )
-                  }
-                  disabled={loading}
-                  className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
-                />
+                    {/* PASSWORD */}
+                    <input
+                      type="text"
+                      placeholder="Password"
+                      value={row.password}
+                      onChange={(e) =>
+                        updateRow(
+                          index,
+                          'password',
+                          e.target.value
+                        )
+                      }
+                      disabled={loading}
+                      className="px-2 py-2 bg-slate-900 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    />
 
-                <input
-                  type="text"
-                  placeholder="duration"
-                  value={
-                    row.duration
-                  }
-                  onChange={(e) =>
-                    updateRow(
-                      index,
-                      'duration',
-                      e.target.value
-                    )
-                  }
-                  disabled={loading}
-                  className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
-                />
+                    {/* PROFILE */}
+                    <input
+                      type="text"
+                      placeholder="Profile"
+                      value={row.profile}
+                      onChange={(e) =>
+                        updateRow(
+                          index,
+                          'profile',
+                          e.target.value
+                        )
+                      }
+                      disabled={loading}
+                      className="px-2 py-2 bg-slate-900 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    />
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    removeRow(index)
-                  }
-                  disabled={loading}
-                  className="inline-flex items-center justify-center gap-1 rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-2 text-[11px] font-medium text-red-300 hover:bg-red-500/20 disabled:opacity-50 transition"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Supprimer
-                </button>
+                    {/* DURATION */}
+                    <input
+                      type="text"
+                      placeholder="Duration"
+                      value={row.duration}
+                      onChange={(e) =>
+                        updateRow(
+                          index,
+                          'duration',
+                          e.target.value
+                        )
+                      }
+                      disabled={loading}
+                      className="px-2 py-2 bg-slate-900 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    />
+
+                    {/* SUPPRIMER */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        removeRow(index)
+                      }
+                      disabled={loading}
+                      className="inline-flex items-center justify-center gap-1 rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-2 text-[11px] font-medium text-red-300 hover:bg-red-500/20 disabled:opacity-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Supprimer
+                    </button>
+
                   </div>
                 )
               )}
+
             </div>
+
           </div>
+
         </div>
 
-        {/* ÉTAPE 4 : RÉSUMÉ ET IMPORTATION */}
+        {/* =========================
+            ÉTAPE 3 : IMPORTATION
+        ========================== */}
         <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-4">
+
           <div className="flex items-center gap-3">
-            <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-600 text-xs font-bold text-white flex-shrink-0">
-              4
+
+            <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">
+              3
             </div>
+
             <div>
               <label className="block text-sm font-semibold text-slate-200">
                 Vérifier et Importer
               </label>
+
               <p className="text-[11px] text-slate-400 mt-0.5">
-                Vérifiez vos données puis lancez l'importation
+                Vérifiez les informations puis lancez l'importation
               </p>
             </div>
+
           </div>
 
+          {/* RÉSUMÉ */}
           <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-            <div className="text-[11px] text-slate-300 space-y-1">
+
+            <div className="text-[11px] text-slate-300 space-y-2">
+
               <div className="flex items-center justify-between">
+
                 <span className="text-slate-400">
                   Zone :
                 </span>
+
                 <span className="font-semibold text-slate-100">
-                  {selectedZone?.name ||
+                  {zones.find(
+                    (zone) =>
+                      (zone._id ||
+                        zone.id) ===
+                      selectedZone
+                  )?.name ||
                     'Non sélectionnée'}
                 </span>
+
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400">
-                  Forfait :
-                </span>
-                <span className="font-semibold text-slate-100">
-                  {selectedPlan?.name ||
-                    'Non sélectionné'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between border-t border-slate-600 pt-1 mt-1">
+
+              <div className="flex items-center justify-between border-t border-slate-600 pt-2">
+
                 <span className="text-slate-400">
                   Tickets valides :
                 </span>
+
                 <span className="font-semibold text-emerald-400">
-                  {rows.filter(
-                    (row) =>
-                      String(
-                        row.code
-                      ).trim() &&
-                      String(
-                        row.password
-                      ).trim()
-                  ).length}
+                  {normalizedRows.length}
                 </span>
+
               </div>
+
+              {file && (
+                <div className="flex items-center justify-between border-t border-slate-600 pt-2">
+
+                  <span className="text-slate-400">
+                    Fichier :
+                  </span>
+
+                  <span className="font-semibold text-slate-100 truncate max-w-[200px]">
+                    {file.name}
+                  </span>
+
+                </div>
+              )}
+
             </div>
+
           </div>
 
+          {/* BOUTON IMPORTATION */}
           <button
             type="submit"
             disabled={
               loading ||
-              plansLoading ||
               !selectedZone ||
-              !selectedPlan ||
-              rows.filter(
-                (row) =>
-                  String(
-                    row.code
-                  ).trim() &&
-                  String(
-                    row.password
-                  ).trim()
-              ).length === 0
+              (!hasValidTickets && !file)
             }
             className="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/30"
           >
+
             {loading && (
               <Loader2 className="w-5 h-5 animate-spin" />
             )}
 
             {loading
               ? 'Importation en cours…'
-              : plansLoading
-              ? 'Chargement du forfait…'
               : "✓ Lancer l'importation"}
+
           </button>
+
         </div>
 
-        {message && (
-          <div
-            className={`p-3 rounded-xl text-[11px] font-medium ${
-              message.type ===
-              'success'
-                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
-                : 'bg-red-500/10 border border-red-500/20 text-red-300'
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
       </form>
     </div>
   );
 }
-

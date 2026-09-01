@@ -52,16 +52,34 @@ export default function CsvUploader({ zones, onUploadSuccess, onClose }) {
       return;
     }
 
+    if (!selectedZone) {
+      setMessage({ type: 'error', text: 'Sélectionnez d’abord une zone avant d’importer un CSV.' });
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
 
-    const planId = selectedPlan?._id || selectedPlan?.id;
-    const formData = new FormData();
-    formData.append('file', file);
-    if (selectedZone) formData.append('zone_id', selectedZone);
-    if (planId) formData.append('plan_id', planId);
-
     try {
+      let activePlan = selectedPlan;
+      if (!activePlan && selectedZone) {
+        const response = await API.get(`/plans/zone/${selectedZone}`);
+        const zonePlans = Array.isArray(response.data) ? response.data : [];
+        if (zonePlans.length === 0) {
+          setMessage({ type: 'error', text: 'Aucun forfait disponible pour cette zone. Créez-en un avant d’importer.' });
+          setLoading(false);
+          return;
+        }
+        activePlan = zonePlans[0];
+        setSelectedPlan(activePlan);
+      }
+
+      const planId = activePlan?._id || activePlan?.id;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('zone_id', selectedZone);
+      if (planId) formData.append('plan_id', planId);
+
       const res = await stockService.uploadCsv(formData);
       setMessage({
         type: 'success',

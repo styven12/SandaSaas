@@ -9,7 +9,7 @@ export const stockService = {
 
   // Importer un fichier CSV de tickets
   uploadCsv: async (formData) => {
-    const response = await API.post('/tickets/upload', formData, {
+    const response = await API.post('/tickets/import', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;

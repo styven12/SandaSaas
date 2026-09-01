@@ -26,14 +26,22 @@ export default function SmsStorePage() {
     setLoading(true);
     try {
       const data = await smsService.getSmsStoreInfo();
-      setBalance(data.balance || 0);
-      setPacks(data.packs || [
-        { id: 'sms_100', smsCount: 100, price: 1500, label: 'Débutant' },
-        { id: 'sms_500', smsCount: 500, price: 6000, label: 'Populaire', popular: true },
-        { id: 'sms_2000', smsCount: 2000, price: 20000, label: 'Pro / Business' },
-      ]);
-      if (data.packs && data.packs.length > 0) {
-        setSelectedPack(data.packs[1] || data.packs[0]);
+      const normalizedPacks = (data.packs || [
+        { id: 'MINI', pack_key: 'MINI', smsCount: 100, price: 2000, label: 'MINI' },
+        { id: 'STARTER', pack_key: 'STARTER', smsCount: 500, price: 6000, label: 'STARTER', popular: true },
+        { id: 'PRO', pack_key: 'PRO', smsCount: 2000, price: 20000, label: 'PRO' },
+      ]).map((pack) => ({
+        ...pack,
+        id: pack.id || pack.pack_key || pack.key || pack.name,
+        pack_key: pack.pack_key || pack.id || pack.key || pack.name,
+        smsCount: pack.smsCount ?? pack.sms_count ?? pack.count ?? 0,
+        label: pack.label || pack.name || pack.pack_key || pack.id,
+      }));
+
+      setBalance(data.balance || data.sms_balance || 0);
+      setPacks(normalizedPacks);
+      if (normalizedPacks.length > 0) {
+        setSelectedPack(normalizedPacks[1] || normalizedPacks[0]);
       }
     } catch (err) {
       console.error(err);

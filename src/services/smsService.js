@@ -12,9 +12,13 @@ export const smsService = {
 
   // Acheter un pack de SMS via Mobile Money
   buySmsPack: async (purchaseData) => {
+    const packKey = purchaseData.pack_key || purchaseData.packId || purchaseData.id || purchaseData.key;
+
     const response = await API.post('/sms/buy-pack', {
-      pack_key: purchaseData.pack_key || purchaseData.packId,
+      pack_key: packKey,
+      packId: packKey,
       phone: purchaseData.phone,
+      provider: purchaseData.provider,
     });
     return response.data;
   }

@@ -1,5 +1,14 @@
 import API from './api';
 
+const getStorage = (rememberMe) => (rememberMe ? localStorage : sessionStorage);
+
+const clearAuthStorage = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('tenant');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('tenant');
+};
+
 export const authService = {
   // Inscription d'un nouveau gérant
   register: async (data) => {
@@ -12,24 +21,35 @@ export const authService = {
 
   // Connexion d'un gérant
   login: async (credentials) => {
-    const response = await API.post('/auth/login', credentials);
+    const rememberMe = Boolean(credentials?.rememberMe);
+    const storage = getStorage(rememberMe);
+
+    const response = await API.post('/auth/login', {
+      ...credentials,
+      rememberMe,
+    });
+
     if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('tenant', JSON.stringify(response.data.tenant));
+      clearAuthStorage();
+      storage.setItem('token', response.data.token);
+      storage.setItem('tenant', JSON.stringify(response.data.tenant));
     }
     return response.data;
   },
 
   // Déconnexion
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('tenant');
+    clearAuthStorage();
     window.location.href = '/login';
   },
 
   // Récupérer le gérant stocké localement
   getCurrentTenant: () => {
-    const tenant = localStorage.getItem('tenant');
+    const tenant = localStorage.getItem('tenant') || sessionStorage.getItem('tenant');
     return tenant ? JSON.parse(tenant) : null;
+  },
+
+  getStoredToken: () => {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
   }
 };

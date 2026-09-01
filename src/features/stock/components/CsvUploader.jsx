@@ -259,21 +259,27 @@ export default function CsvUploader({
   };
 
   const hasManualEntries = rows.some(
-    (row) => row.code || row.password || row.profile || row.duration
+    (row) => String(row.code).trim() && String(row.password).trim()
   );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(null);
 
+    // Valider que les lignes ont au minimum code ET password
     const normalizedRows = rows.filter(
-      (row) => row.code || row.password || row.profile || row.duration
+      (row) => String(row.code).trim() && String(row.password).trim()
     );
+
+    console.log('normalizedRows:', normalizedRows);
+    console.log('file:', file);
+    console.log('selectedZone:', selectedZone);
+    console.log('selectedPlan:', selectedPlan);
 
     if (normalizedRows.length === 0 && !file) {
       setMessage({
         type: 'error',
-        text: 'Ajoutez au moins un élément ou sélectionnez un fichier CSV.',
+        text: 'Ajoutez au moins un élément (code + password) ou sélectionnez un fichier CSV.',
       });
       return;
     }
@@ -311,7 +317,11 @@ export default function CsvUploader({
       const fileToUpload = (() => {
         if (normalizedRows.length > 0) {
           const csvPayload = buildCsvFromRows(normalizedRows);
-          return new File([csvPayload], file?.name || 'tickets.csv', {
+          console.log('CSV Payload:', csvPayload);
+          
+          // Créer un Blob depuis la chaîne CSV
+          const blob = new Blob([csvPayload], { type: 'text/csv;charset=utf-8' });
+          return new File([blob], file?.name || 'tickets.csv', {
             type: 'text/csv;charset=utf-8',
           });
         }
@@ -331,6 +341,12 @@ export default function CsvUploader({
       formData.append('zone_id', selectedZone);
       formData.append('plan_id', planId);
 
+      console.log('FormData envoyé:', {
+        file: fileToUpload.name,
+        zone_id: selectedZone,
+        plan_id: planId,
+      });
+
       const res = await stockService.uploadCsv(formData);
 
       setMessage({
@@ -348,7 +364,12 @@ export default function CsvUploader({
         onUploadSuccess();
       }
     } catch (err) {
-      console.error('Erreur import CSV:', err);
+      console.error('Erreur import CSV complet:', {
+        error: err,
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+      });
 
       const errorMessage =
         err.response?.data?.error ||

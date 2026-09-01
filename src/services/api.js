@@ -18,6 +18,15 @@ API.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Gérer le Content-Type pour les fichiers
+    if (config.data instanceof FormData) {
+      // Supprimer le Content-Type pour que axios/navigateur gère multipart/form-data
+      delete config.headers['Content-Type'];
+    } else if (!config.data || typeof config.data === 'object') {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    
     return config;
   },
   (error) => Promise.reject(error)

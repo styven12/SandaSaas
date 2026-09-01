@@ -733,15 +733,25 @@ export default function CsvUploader({
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-4"
+        className="space-y-5"
       >
 
-        {/* ZONE */}
+        {/* ÉTAPE 1 : SÉLECTION ZONE */}
         {zones.length > 0 && (
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">
-              Associer à la Zone
-            </label>
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white flex-shrink-0">
+                1
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-200">
+                  Sélectionnez une Zone
+                </label>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Choisissez la zone où importer les tickets
+                </p>
+              </div>
+            </div>
 
             <select
               value={selectedZone}
@@ -755,10 +765,10 @@ export default function CsvUploader({
                 );
               }}
               disabled={loading}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50 transition"
             >
               <option value="">
-                -- Sélectionner une zone --
+                -- Choisir une zone --
               </option>
 
               {zones.map((zone) => {
@@ -776,15 +786,32 @@ export default function CsvUploader({
                 );
               })}
             </select>
+
+            {selectedZone && (
+              <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Zone sélectionnée avec succès
+              </div>
+            )}
           </div>
         )}
 
-        {/* FORFAIT */}
+        {/* ÉTAPE 2 : SÉLECTION FORFAIT */}
         {selectedZone && (
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">
-              Forfait associé
-            </label>
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white flex-shrink-0">
+                2
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-200">
+                  Sélectionnez le Forfait
+                </label>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Choisissez le forfait pour ces tickets
+                </p>
+              </div>
+            </div>
 
             {plansLoading ? (
               <div className="flex items-center gap-2 text-[11px] text-slate-400">
@@ -792,128 +819,190 @@ export default function CsvUploader({
                 Chargement des forfaits…
               </div>
             ) : plans.length > 0 ? (
-              <select
-                value={
-                  selectedPlan?._id ||
-                  selectedPlan?.id ||
-                  ''
-                }
-                onChange={(e) => {
-                  const plan =
-                    plans.find(
-                      (p) =>
-                        (p._id ||
-                          p.id) ===
-                        e.target.value
-                    );
-
-                  setSelectedPlan(
-                    plan || null
-                  );
-                }}
-                disabled={loading}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
-              >
-                {plans.map(
-                  (plan) => {
-                    const planId =
-                      plan._id ||
-                      plan.id;
-
-                    return (
-                      <option
-                        key={planId}
-                        value={planId}
-                      >
-                        {plan.name} —{' '}
-                        {plan.price}{' '}
-                        FCFA
-                      </option>
-                    );
+              <>
+                <select
+                  value={
+                    selectedPlan?._id ||
+                    selectedPlan?.id ||
+                    ''
                   }
+                  onChange={(e) => {
+                    const plan =
+                      plans.find(
+                        (p) =>
+                          (p._id ||
+                            p.id) ===
+                          e.target.value
+                      );
+
+                    setSelectedPlan(
+                      plan || null
+                    );
+                  }}
+                  disabled={loading}
+                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50 transition"
+                >
+                  <option value="">
+                    -- Choisir un
+                    forfait --
+                  </option>
+
+                  {plans.map(
+                    (plan) => {
+                      const planId =
+                        plan._id ||
+                        plan.id;
+
+                      return (
+                        <option
+                          key={planId}
+                          value={planId}
+                        >
+                          {plan.name} —{' '}
+                          {plan.price}{' '}
+                          FCFA
+                        </option>
+                      );
+                    }
+                  )}
+                </select>
+
+                {selectedPlan && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Forfait
+                    sélectionné
+                  </div>
                 )}
-              </select>
+              </>
             ) : (
               <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-[11px] text-red-400">
-                Aucun forfait trouvé
-                pour cette zone.
+                ⚠️ Aucun forfait
+                trouvé pour cette
+                zone. Créez d'abord
+                un forfait.
               </div>
             )}
           </div>
         )}
 
-        {/* CSV */}
-        <div>
-          <label
-            htmlFor="csv-upload"
-            className="border-2 border-dashed border-slate-800 hover:border-slate-700 bg-slate-950 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition"
-          >
-            <FileText className="w-8 h-8 text-slate-500" />
-
-            <span className="text-xs text-slate-300 font-medium text-center">
-              {file
-                ? file.name
-                : 'Cliquez ou glissez votre fichier .CSV ici'}
-            </span>
-
-            <span className="text-[11px] text-slate-500 text-center">
-              Format accepté :
-              code, password,
-              profile, duration
-            </span>
-
-            {file && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleRemoveFile();
-                }}
-                className="text-[11px] text-red-400 hover:text-red-300"
-              >
-                Supprimer le fichier
-              </button>
-            )}
-
-            <input
-              ref={inputRef}
-              id="csv-upload"
-              type="file"
-              accept=".csv,text/csv"
-              onChange={
-                handleFileChange
-              }
-              className="hidden"
-            />
-          </label>
-        </div>
-
-        {/* ENTRÉES MANUELLES */}
-        <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-3">
-
-          <div className="flex items-center justify-between">
-            <label className="text-[11px] font-medium text-slate-400">
-              Éléments manuels
-            </label>
-
-            <button
-              type="button"
-              onClick={addRow}
-              disabled={loading}
-              className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-2 py-1 text-[10px] font-medium text-white hover:bg-blue-500 disabled:opacity-50"
-            >
-              <Plus className="w-3 h-3" />
-              Ajouter
-            </button>
+        {/* ÉTAPE 3 : IMPORTER CSV OU AJOUTER MANUELLEMENT */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white flex-shrink-0">
+              3
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-200">
+                Importer les Tickets
+              </label>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Choisissez un fichier CSV ou ajoutez les tickets manuellement
+              </p>
+            </div>
           </div>
 
-          {rows.map(
-            (row, index) => (
-              <div
-                key={`row-${index}`}
-                className="grid grid-cols-1 gap-2 rounded-xl border border-slate-800 bg-slate-900 p-2 md:grid-cols-5"
+          {/* CSV Upload */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+            <label
+              htmlFor="csv-upload"
+              className="border-2 border-dashed border-slate-700 hover:border-slate-600 bg-slate-900 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition"
+            >
+              <FileText className="w-8 h-8 text-slate-500" />
+
+              <span className="text-sm text-slate-300 font-medium text-center">
+                {file
+                  ? file.name
+                  : 'Cliquez ou glissez votre fichier .CSV ici'}
+              </span>
+
+              <span className="text-[11px] text-slate-400 text-center">
+                Format accepté :
+                code, password,
+                profile, duration
+              </span>
+
+              {file && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRemoveFile();
+                  }}
+                  className="text-[11px] text-red-400 hover:text-red-300 font-medium mt-2"
+                >
+                  ✕ Supprimer le fichier
+                </button>
+              )}
+
+              <input
+                ref={inputRef}
+                id="csv-upload"
+                type="file"
+                accept=".csv,text/csv"
+                onChange={
+                  handleFileChange
+                }
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* ENTRÉES MANUELLES */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-sm font-semibold text-slate-200">
+                  Ou ajoutez manuellement
+                </label>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Ajouter des tickets ligne par ligne
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={addRow}
+                disabled={loading}
+                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-[11px] font-semibold text-white hover:bg-emerald-500 disabled:opacity-50 transition"
               >
+                <Plus className="w-4 h-4" />
+                Ajouter une ligne
+              </button>
+            </div>
+
+            {rows.length > 0 && (
+              <div className="text-[11px] text-slate-400 px-2">
+                {rows.filter(
+                  (row) =>
+                    String(
+                      row.code
+                    ).trim() &&
+                    String(
+                      row.password
+                    ).trim()
+                ).length > 0
+                  ? `${rows.filter(
+                      (row) =>
+                        String(
+                          row.code
+                        ).trim() &&
+                        String(
+                          row.password
+                        ).trim()
+                    ).length} ticket(s) valide(s)`
+                  : 'Aucun ticket valide (code + password requis)'}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {rows.map(
+                (row, index) => (
+                  <div
+                    key={`row-${index}`}
+                    className="grid grid-cols-1 gap-2 rounded-xl border border-slate-700 bg-slate-800 p-3 md:grid-cols-5"
+                  >
                 <input
                   type="text"
                   placeholder="code"
@@ -986,36 +1075,116 @@ export default function CsvUploader({
                     removeRow(index)
                   }
                   disabled={loading}
-                  className="inline-flex items-center justify-center gap-1 rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-2 text-[10px] font-medium text-red-300 hover:bg-red-500/20 disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1 rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-2 text-[11px] font-medium text-red-300 hover:bg-red-500/20 disabled:opacity-50 transition"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-4 h-4" />
                   Supprimer
                 </button>
-              </div>
-            )
-          )}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* BOUTON IMPORTATION */}
-        <button
-          type="submit"
-          disabled={
-            loading ||
-            plansLoading
-          }
-          className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-blue-600/20"
-        >
-          {loading && (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          )}
+        {/* ÉTAPE 4 : RÉSUMÉ ET IMPORTATION */}
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-600 text-xs font-bold text-white flex-shrink-0">
+              4
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-200">
+                Vérifier et Importer
+              </label>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Vérifiez vos données puis lancez l'importation
+              </p>
+            </div>
+          </div>
 
-          {loading
-            ? 'Importation en cours…'
-            : plansLoading
-            ? 'Chargement du forfait…'
-            : "Lancer l'importation"}
-        </button>
+          <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+            <div className="text-[11px] text-slate-300 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">
+                  Zone :
+                </span>
+                <span className="font-semibold text-slate-100">
+                  {selectedZone?.name ||
+                    'Non sélectionnée'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">
+                  Forfait :
+                </span>
+                <span className="font-semibold text-slate-100">
+                  {selectedPlan?.name ||
+                    'Non sélectionné'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-t border-slate-600 pt-1 mt-1">
+                <span className="text-slate-400">
+                  Tickets valides :
+                </span>
+                <span className="font-semibold text-emerald-400">
+                  {rows.filter(
+                    (row) =>
+                      String(
+                        row.code
+                      ).trim() &&
+                      String(
+                        row.password
+                      ).trim()
+                  ).length}
+                </span>
+              </div>
+            </div>
+          </div>
 
+          <button
+            type="submit"
+            disabled={
+              loading ||
+              plansLoading ||
+              !selectedZone ||
+              !selectedPlan ||
+              rows.filter(
+                (row) =>
+                  String(
+                    row.code
+                  ).trim() &&
+                  String(
+                    row.password
+                  ).trim()
+              ).length === 0
+            }
+            className="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/30"
+          >
+            {loading && (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            )}
+
+            {loading
+              ? 'Importation en cours…'
+              : plansLoading
+              ? 'Chargement du forfait…'
+              : "✓ Lancer l'importation"}
+          </button>
+        </div>
+
+        {message && (
+          <div
+            className={`p-3 rounded-xl text-[11px] font-medium ${
+              message.type ===
+              'success'
+                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
+                : 'bg-red-500/10 border border-red-500/20 text-red-300'
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
       </form>
     </div>
   );

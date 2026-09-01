@@ -179,6 +179,10 @@ export default function CsvUploader({
   const [loading, setLoading] = useState(false);
   const [plansLoading, setPlansLoading] = useState(false);
 
+  const [newPlanName, setNewPlanName] = useState('');
+  const [newPlanPrice, setNewPlanPrice] = useState('');
+  const [creatingPlan, setCreatingPlan] = useState(false);
+
   const [message, setMessage] = useState(null);
 
   /*
@@ -230,6 +234,73 @@ export default function CsvUploader({
 
     loadPlans();
   }, [selectedZone]);
+
+  /*
+   * Créer un forfait
+   */
+  const handleCreatePlan = async (e) => {
+    e.preventDefault();
+
+    if (!newPlanName.trim() || !newPlanPrice.trim()) {
+      setMessage({
+        type: 'error',
+        text: 'Veuillez remplir le nom et le prix du forfait.',
+      });
+      return;
+    }
+
+    setCreatingPlan(true);
+
+    try {
+      const zoneId =
+        selectedZone?._id || selectedZone?.id;
+
+      const response =
+        await stockService.createPlan(
+          zoneId,
+          newPlanName.trim(),
+          parseFloat(newPlanPrice)
+        );
+
+      setNewPlanName('');
+      setNewPlanPrice('');
+
+      setMessage({
+        type: 'success',
+        text: `Forfait "${response.plan.name}" créé avec succès !`,
+      });
+
+      // Recharger les forfaits
+      setPlansLoading(true);
+      const updatedPlans =
+        await stockService.getPlansByZone(
+          zoneId
+        );
+      setPlans(updatedPlans);
+
+      if (updatedPlans.length > 0) {
+        setSelectedPlan(
+          updatedPlans[0]
+        );
+      }
+    } catch (err) {
+      console.error(
+        'Erreur création forfait:',
+        err
+      );
+
+      setMessage({
+        type: 'error',
+        text:
+          err.response?.data?.error ||
+          err.response?.data?.message ||
+          'Erreur lors de la création du forfait.',
+      });
+    } finally {
+      setCreatingPlan(false);
+      setPlansLoading(false);
+    }
+  };
 
   /*
    * Modification d'une ligne
@@ -876,11 +947,83 @@ export default function CsvUploader({
                 )}
               </>
             ) : (
-              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-[11px] text-red-400">
-                ⚠️ Aucun forfait
-                trouvé pour cette
-                zone. Créez d'abord
-                un forfait.
+              <div className="space-y-3">
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>Aucun forfait trouvé pour cette zone. Créez-en un maintenant.</span>
+                </div>
+
+                <form
+                  onSubmit={
+                    handleCreatePlan
+                  }
+                  className="p-4 rounded-xl bg-slate-800/50 border border-slate-700 space-y-3"
+                >
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-300 mb-1.5">
+                      Nom du forfait
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ex: Basic, Premium, Pro"
+                      value={
+                        newPlanName
+                      }
+                      onChange={(e) =>
+                        setNewPlanName(
+                          e.target
+                            .value
+                        )
+                      }
+                      disabled={
+                        creatingPlan
+                      }
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-300 mb-1.5">
+                      Prix (FCFA)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Ex: 5000"
+                      value={
+                        newPlanPrice
+                      }
+                      onChange={(e) =>
+                        setNewPlanPrice(
+                          e.target
+                            .value
+                        )
+                      }
+                      disabled={
+                        creatingPlan
+                      }
+                      min="0"
+                      step="100"
+                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={
+                      creatingPlan ||
+                      !newPlanName.trim() ||
+                      !newPlanPrice.trim()
+                    }
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs rounded-lg flex items-center justify-center gap-2 transition"
+                  >
+                    {creatingPlan && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    )}
+                    {creatingPlan
+                      ? 'Création en cours…'
+                      : '+ Créer le forfait'}
+                  </button>
+                </form>
               </div>
             )}
           </div>

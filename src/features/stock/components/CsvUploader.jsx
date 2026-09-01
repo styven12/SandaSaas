@@ -5,12 +5,29 @@ import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, X } from 'lu
 
 export default function CsvUploader({ zones, onUploadSuccess, onClose }) {
   const [file, setFile] = useState(null);
-  const [selectedZone, setSelectedZone] = useState(zones[0]?._id || zones[0]?.id || '');
+  const [selectedZone, setSelectedZone] = useState('');
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [loading, setLoading] = useState(false);
   const [plansLoading, setPlansLoading] = useState(false);
   const [message, setMessage] = useState(null);
+
+  useEffect(() => {
+    if (!zones || zones.length === 0) {
+      setSelectedZone('');
+      setSelectedPlan(null);
+      setPlans([]);
+      return;
+    }
+
+    const firstZoneId = zones[0]?._id || zones[0]?.id || '';
+    setSelectedZone((current) => {
+      if (current && zones.some((zone) => (zone._id || zone.id) === current)) {
+        return current;
+      }
+      return firstZoneId;
+    });
+  }, [zones]);
 
   useEffect(() => {
     const loadPlans = async () => {

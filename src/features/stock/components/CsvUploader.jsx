@@ -1,12 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import API from '../../../services/api';
 import { stockService } from '../../../services/stockService';
 import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, X } from 'lucide-react';
 
 export default function CsvUploader({ zones, onUploadSuccess, onClose }) {
   const [file, setFile] = useState(null);
   const [selectedZone, setSelectedZone] = useState(zones[0]?._id || zones[0]?.id || '');
+  const [plans, setPlans] = useState([]);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [plansLoading, setPlansLoading] = useState(false);
   const [message, setMessage] = useState(null);
+
+  useEffect(() => {
+    const loadPlans = async () => {
+      if (!selectedZone) {
+        setPlans([]);
+        setSelectedPlan(null);
+        return;
+      }
+
+      try {
+        setPlansLoading(true);
+        const response = await API.get(`/plans/zone/${selectedZone}`);
+        const zonePlans = Array.isArray(response.data) ? response.data : [];
+        setPlans(zonePlans);
+        setSelectedPlan(zonePlans[0] || null);
+      } catch (err) {
+        console.error('Erreur chargement plans:', err);
+        setPlans([]);
+        setSelectedPlan(null);
+      } finally {
+        setPlansLoading(false);
+      }
+    };
+
+    loadPlans();
+  }, [selectedZone]);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -22,12 +52,18 @@ export default function CsvUploader({ zones, onUploadSuccess, onClose }) {
       return;
     }
 
+    if (!selectedPlan) {
+      setMessage({ type: 'error', text: 'Aucun forfait disponible pour cette zone. Créez d’abord un forfait avant d’importer des tickets.' });
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
 
     const formData = new FormData();
     formData.append('file', file);
     if (selectedZone) formData.append('zone_id', selectedZone);
+    if (selectedPlan) formData.append('plan_id', selectedPlan.id || selectedPlan._id);
 
     try {
       const res = await stockService.uploadCsv(formData);
@@ -87,6 +123,32 @@ export default function CsvUploader({ zones, onUploadSuccess, onClose }) {
           </div>
         )}
 
+        {selectedZone && (
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Forfait associé</label>
+            {plansLoading ? (
+              <div className="text-[11px] text-slate-400">Chargement des forfaits…</div>
+            ) : plans.length > 0 ? (
+              <select
+                value={selectedPlan?._id || selectedPlan?.id || ''}
+                onChange={(e) => {
+                  const plan = plans.find((p) => (p._id || p.id) === e.target.value);
+                  setSelectedPlan(plan || null);
+                }}
+                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+              >
+                {plans.map((plan) => (
+                  <option key={plan._id || plan.id} value={plan._id || plan.id}>
+                    {plan.name} — {plan.price} FCFA
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="text-[11px] text-red-400">Aucun forfait trouvé pour cette zone.</div>
+            )}
+          </div>
+        )}
+
         {/* Zone de Drag & Drop */}
         <label className="border-2 border-dashed border-slate-800 hover:border-slate-700 bg-slate-950 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition">
           <FileText className="w-8 h-8 text-slate-500" />
@@ -99,11 +161,11 @@ export default function CsvUploader({ zones, onUploadSuccess, onClose }) {
 
         <button
           type="submit"
-          disabled={loading || !file}
+          disabled={loading || !file || !selectedPlan || plansLoading}
           className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-blue-600/20"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-          Lancer l'importation
+          {plansLoading ? 'Chargement du forfait…' : 'Lancer l\'importation'}
         </button>
       </form>
     </div>

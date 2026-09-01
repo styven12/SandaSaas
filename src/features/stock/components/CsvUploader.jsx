@@ -60,10 +60,11 @@ export default function CsvUploader({ zones, onUploadSuccess, onClose }) {
     setLoading(true);
     setMessage(null);
 
+    const planId = selectedPlan?._id || selectedPlan?.id;
     const formData = new FormData();
     formData.append('file', file);
     if (selectedZone) formData.append('zone_id', selectedZone);
-    if (selectedPlan) formData.append('plan_id', selectedPlan.id || selectedPlan._id);
+    if (planId) formData.append('plan_id', planId);
 
     try {
       const res = await stockService.uploadCsv(formData);

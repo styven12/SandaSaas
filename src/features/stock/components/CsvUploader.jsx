@@ -52,11 +52,6 @@ export default function CsvUploader({ zones, onUploadSuccess, onClose }) {
       return;
     }
 
-    if (!selectedPlan) {
-      setMessage({ type: 'error', text: 'Aucun forfait disponible pour cette zone. Créez d’abord un forfait avant d’importer des tickets.' });
-      return;
-    }
-
     setLoading(true);
     setMessage(null);
 
@@ -162,7 +157,7 @@ export default function CsvUploader({ zones, onUploadSuccess, onClose }) {
 
         <button
           type="submit"
-          disabled={loading || !file || !selectedPlan || plansLoading}
+          disabled={loading || !file || plansLoading}
           className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-blue-600/20"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}

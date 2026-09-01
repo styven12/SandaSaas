@@ -12,7 +12,12 @@ import {
   Trash2,
 } from 'lucide-react';
 
-const EMPTY_ROW = { code: '', password: '', profile: 'default', duration: '' };
+const EMPTY_ROW = {
+  code: '',
+  password: '',
+  profile: 'default',
+  duration: '',
+};
 
 const parseCsvLine = (line = '') => {
   const values = [];
@@ -42,6 +47,7 @@ const parseCsvLine = (line = '') => {
   }
 
   values.push(current.trim());
+
   return values;
 };
 
@@ -58,25 +64,52 @@ const parseCsvRows = (csvText = '') => {
     .map((line) => line.trim())
     .filter(Boolean);
 
-  if (rows.length < 2) return [];
+  if (rows.length < 2) {
+    return [];
+  }
 
-  const headers = parseCsvLine(rows[0]).map((header) => normalizeHeader(header));
+  const headers = parseCsvLine(rows[0]).map(normalizeHeader);
+
   const parsed = [];
 
   for (let i = 1; i < rows.length; i += 1) {
     const values = parseCsvLine(rows[i]);
 
-    if (!values.some((value) => String(value).trim())) continue;
+    if (!values.some((value) => String(value).trim())) {
+      continue;
+    }
 
     const item = {};
+
     headers.forEach((header, index) => {
       item[header] = values[index] ?? '';
     });
 
-    const code = item.code || item.name || item.username || item.user || item.email || '';
-    const password = item.password || item.pass || item.pwd || '';
-    const profile = item.profile || item.plan || item.forfait || 'default';
-    const duration = item.duration || item.days || item.validity || '';
+    const code =
+      item.code ||
+      item.name ||
+      item.username ||
+      item.user ||
+      item.email ||
+      '';
+
+    const password =
+      item.password ||
+      item.pass ||
+      item.pwd ||
+      '';
+
+    const profile =
+      item.profile ||
+      item.plan ||
+      item.forfait ||
+      'default';
+
+    const duration =
+      item.duration ||
+      item.days ||
+      item.validity ||
+      '';
 
     if (code && password) {
       parsed.push({
@@ -93,10 +126,14 @@ const parseCsvRows = (csvText = '') => {
 
 const buildCsvFromRows = (items = []) => {
   const validItems = items.filter(
-    (item) => item.code || item.password || item.profile || item.duration
+    (item) =>
+      String(item.code || '').trim() &&
+      String(item.password || '').trim()
   );
 
-  const lines = [['code', 'password', 'profile', 'duration']];
+  const lines = [
+    ['code', 'password', 'profile', 'duration'],
+  ];
 
   validItems.forEach((item) => {
     lines.push([
@@ -110,7 +147,10 @@ const buildCsvFromRows = (items = []) => {
   return lines
     .map((row) =>
       row
-        .map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`)
+        .map(
+          (cell) =>
+            `"${String(cell ?? '').replace(/"/g, '""')}"`
+        )
         .join(',')
     )
     .join('\n');
@@ -122,8 +162,13 @@ export default function CsvUploader({
   onClose,
 }) {
   const inputRef = useRef(null);
+
   const [file, setFile] = useState(null);
-  const [rows, setRows] = useState([{ ...EMPTY_ROW }]);
+
+  const [rows, setRows] = useState([
+    { ...EMPTY_ROW },
+  ]);
+
   const [selectedZone, setSelectedZone] = useState(
     zones[0]?._id || zones[0]?.id || ''
   );
@@ -136,6 +181,9 @@ export default function CsvUploader({
 
   const [message, setMessage] = useState(null);
 
+  /*
+   * Chargement des forfaits
+   */
   useEffect(() => {
     const loadPlans = async () => {
       if (!selectedZone) {
@@ -148,19 +196,31 @@ export default function CsvUploader({
         setPlansLoading(true);
         setMessage(null);
 
-        const response = await API.get(`/plans/zone/${selectedZone}`);
-        const zonePlans = Array.isArray(response.data) ? response.data : [];
+        const response = await API.get(
+          `/plans/zone/${selectedZone}`
+        );
+
+        const zonePlans = Array.isArray(response.data)
+          ? response.data
+          : [];
 
         setPlans(zonePlans);
-        setSelectedPlan(zonePlans[0] ?? null);
+
+        setSelectedPlan(zonePlans[0] || null);
       } catch (err) {
-        console.error('Erreur chargement plans:', err);
+        console.error(
+          'Erreur chargement plans:',
+          err
+        );
+
         setPlans([]);
         setSelectedPlan(null);
+
         setMessage({
           type: 'error',
           text:
             err.response?.data?.error ||
+            err.response?.data?.message ||
             'Impossible de charger les forfaits de cette zone.',
         });
       } finally {
@@ -171,29 +231,54 @@ export default function CsvUploader({
     loadPlans();
   }, [selectedZone]);
 
+  /*
+   * Modification d'une ligne
+   */
   const updateRow = (index, field, value) => {
     setRows((prev) =>
       prev.map((row, rowIndex) =>
-        rowIndex === index ? { ...row, [field]: value } : row
+        rowIndex === index
+          ? {
+              ...row,
+              [field]: value,
+            }
+          : row
       )
     );
   };
 
+  /*
+   * Ajouter une ligne
+   */
   const addRow = () => {
-    setRows((prev) => [...prev, { ...EMPTY_ROW }]);
+    setRows((prev) => [
+      ...prev,
+      { ...EMPTY_ROW },
+    ]);
   };
 
+  /*
+   * Supprimer une ligne
+   */
   const removeRow = (index) => {
     if (rows.length === 1) {
       setRows([{ ...EMPTY_ROW }]);
       return;
     }
 
-    setRows((prev) => prev.filter((_, rowIndex) => rowIndex !== index));
+    setRows((prev) =>
+      prev.filter(
+        (_, rowIndex) => rowIndex !== index
+      )
+    );
   };
 
+  /*
+   * Sélection du fichier CSV
+   */
   const handleFileChange = async (e) => {
-    const selectedFile = e.target.files?.[0];
+    const selectedFile =
+      e.target.files?.[0];
 
     if (!selectedFile) {
       return;
@@ -201,175 +286,393 @@ export default function CsvUploader({
 
     setMessage(null);
 
-    const fileName = selectedFile.name.toLowerCase();
+    const fileName =
+      selectedFile.name.toLowerCase();
 
     if (!fileName.endsWith('.csv')) {
       setFile(null);
-      setRows([{ ...EMPTY_ROW }]);
-      if (inputRef.current) inputRef.current.value = '';
+
+      setRows([
+        { ...EMPTY_ROW },
+      ]);
+
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
+
       setMessage({
         type: 'error',
-        text: 'Veuillez sélectionner un fichier CSV (.csv).',
+        text:
+          'Veuillez sélectionner un fichier CSV (.csv).',
       });
+
       return;
     }
 
     if (selectedFile.size > 5 * 1024 * 1024) {
       setFile(null);
-      setRows([{ ...EMPTY_ROW }]);
-      if (inputRef.current) inputRef.current.value = '';
+
+      setRows([
+        { ...EMPTY_ROW },
+      ]);
+
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
+
       setMessage({
         type: 'error',
-        text: 'Le fichier CSV ne doit pas dépasser 5 Mo.',
+        text:
+          'Le fichier CSV ne doit pas dépasser 5 Mo.',
       });
+
       return;
     }
 
     try {
-      const csvText = await selectedFile.text();
-      const parsedRows = parseCsvRows(csvText);
+      const csvText =
+        await selectedFile.text();
+
+      const parsedRows =
+        parseCsvRows(csvText);
+
+      if (parsedRows.length === 0) {
+        setFile(null);
+
+        setRows([
+          { ...EMPTY_ROW },
+        ]);
+
+        setMessage({
+          type: 'error',
+          text:
+            'Le fichier CSV est vide ou les colonnes code/password sont introuvables.',
+        });
+
+        return;
+      }
 
       setFile(selectedFile);
 
-      if (parsedRows.length > 0) {
-        setRows(parsedRows.map((row) => ({ ...row, profile: row.profile || 'default' })));
-      } else {
-        setRows([{ ...EMPTY_ROW }]);
-        setMessage({
-          type: 'error',
-          text: 'Le fichier CSV est vide ou les colonnes attendues sont introuvables.',
-        });
-      }
+      setRows(
+        parsedRows.map((row) => ({
+          ...row,
+          profile:
+            row.profile || 'default',
+        }))
+      );
+
+      setMessage({
+        type: 'success',
+        text: `${parsedRows.length} ticket(s) détecté(s) dans le fichier CSV.`,
+      });
     } catch (err) {
-      console.error('Erreur lecture CSV:', err);
+      console.error(
+        'Erreur lecture CSV:',
+        err
+      );
+
       setFile(null);
-      setRows([{ ...EMPTY_ROW }]);
+
+      setRows([
+        { ...EMPTY_ROW },
+      ]);
+
       setMessage({
         type: 'error',
-        text: 'Impossible de lire le fichier CSV sélectionné.',
+        text:
+          'Impossible de lire le fichier CSV sélectionné.',
       });
     }
   };
 
+  /*
+   * Supprimer le fichier
+   */
   const handleRemoveFile = () => {
     setFile(null);
-    setRows([{ ...EMPTY_ROW }]);
-    if (inputRef.current) inputRef.current.value = '';
+
+    setRows([
+      { ...EMPTY_ROW },
+    ]);
+
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+
     setMessage(null);
   };
 
+  /*
+   * Vérifie les entrées manuelles
+   */
   const hasManualEntries = rows.some(
-    (row) => String(row.code).trim() && String(row.password).trim()
+    (row) =>
+      String(row.code || '').trim() &&
+      String(row.password || '').trim()
   );
 
+  /*
+   * IMPORTATION
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage(null);
 
-    // Valider que les lignes ont au minimum code ET password
-    const normalizedRows = rows.filter(
-      (row) => String(row.code).trim() && String(row.password).trim()
+    console.log(
+      '🔥 BOUTON LANCER L’IMPORTATION CLIQUÉ'
     );
 
-    console.log('normalizedRows:', normalizedRows);
-    console.log('file:', file);
-    console.log('selectedZone:', selectedZone);
-    console.log('selectedPlan:', selectedPlan);
+    setMessage(null);
 
-    if (normalizedRows.length === 0 && !file) {
+    /*
+     * Récupérer uniquement les lignes valides
+     */
+    const normalizedRows = rows
+      .map((row) => ({
+        code: String(
+          row.code || ''
+        ).trim(),
+
+        password: String(
+          row.password || ''
+        ).trim(),
+
+        profile: String(
+          row.profile || 'default'
+        ).trim(),
+
+        duration: String(
+          row.duration || ''
+        ).trim(),
+      }))
+      .filter(
+        (row) =>
+          row.code &&
+          row.password
+      );
+
+    console.log(
+      'Tickets valides:',
+      normalizedRows
+    );
+
+    console.log(
+      'Fichier:',
+      file
+    );
+
+    console.log(
+      'Zone:',
+      selectedZone
+    );
+
+    console.log(
+      'Forfait:',
+      selectedPlan
+    );
+
+    /*
+     * Vérification des tickets
+     */
+    if (
+      normalizedRows.length === 0 &&
+      !file
+    ) {
       setMessage({
         type: 'error',
-        text: 'Ajoutez au moins un élément (code + password) ou sélectionnez un fichier CSV.',
+        text:
+          'Ajoutez au moins un ticket avec code + password ou sélectionnez un fichier CSV.',
       });
+
       return;
     }
 
+    /*
+     * Vérification zone
+     */
     if (!selectedZone) {
       setMessage({
         type: 'error',
-        text: 'Veuillez sélectionner une zone.',
+        text:
+          'Veuillez sélectionner une zone.',
       });
+
       return;
     }
 
+    /*
+     * Vérification forfait
+     */
     if (!selectedPlan) {
       setMessage({
         type: 'error',
         text:
-          'Aucun forfait disponible pour cette zone. Créez d’abord un forfait avant d’importer des tickets.',
+          'Aucun forfait disponible pour cette zone. Créez d’abord un forfait.',
       });
+
       return;
     }
 
-    const planId = selectedPlan?._id || selectedPlan?.id;
+    const planId =
+      selectedPlan._id ||
+      selectedPlan.id;
 
     if (!planId) {
       setMessage({
         type: 'error',
-        text: 'Impossible de récupérer l’identifiant du forfait.',
+        text:
+          'Impossible de récupérer l’identifiant du forfait.',
       });
+
       return;
     }
 
     try {
       setLoading(true);
 
-      const fileToUpload = (() => {
-        if (normalizedRows.length > 0) {
-          const csvPayload = buildCsvFromRows(normalizedRows);
-          console.log('CSV Payload:', csvPayload);
-          
-          // Créer un Blob depuis la chaîne CSV
-          const blob = new Blob([csvPayload], { type: 'text/csv;charset=utf-8' });
-          return new File([blob], file?.name || 'tickets.csv', {
-            type: 'text/csv;charset=utf-8',
-          });
-        }
-        return file;
-      })();
+      /*
+       * Construire le fichier à envoyer
+       *
+       * Si des tickets sont présents dans
+       * les lignes du formulaire, on crée
+       * un nouveau CSV.
+       */
+      let fileToUpload = file;
 
+      if (normalizedRows.length > 0) {
+        const csvPayload =
+          buildCsvFromRows(
+            normalizedRows
+          );
+
+        console.log(
+          'CSV envoyé:',
+          csvPayload
+        );
+
+        const blob = new Blob(
+          [csvPayload],
+          {
+            type: 'text/csv;charset=utf-8',
+          }
+        );
+
+        fileToUpload = new File(
+          [blob],
+          file?.name ||
+            'tickets.csv',
+          {
+            type:
+              'text/csv;charset=utf-8',
+          }
+        );
+      }
+
+      /*
+       * Vérification finale
+       */
       if (!fileToUpload) {
         setMessage({
           type: 'error',
-          text: 'Aucun fichier ou éléments valides à importer.',
+          text:
+            'Aucun fichier valide à importer.',
         });
+
         return;
       }
 
-      const formData = new FormData();
-      formData.append('file', fileToUpload);
-      formData.append('zone_id', selectedZone);
-      formData.append('plan_id', planId);
+      /*
+       * FormData
+       */
+      const formData =
+        new FormData();
 
-      console.log('FormData envoyé:', {
-        file: fileToUpload.name,
-        zone_id: selectedZone,
-        plan_id: planId,
-      });
+      formData.append(
+        'file',
+        fileToUpload
+      );
 
-      const res = await stockService.uploadCsv(formData);
+      formData.append(
+        'zone_id',
+        selectedZone
+      );
 
+      formData.append(
+        'plan_id',
+        planId
+      );
+
+      console.log(
+        '📤 Envoi FormData:',
+        {
+          file:
+            fileToUpload.name,
+          zone_id:
+            selectedZone,
+          plan_id:
+            planId,
+        }
+      );
+
+      /*
+       * Appel backend
+       */
+      const res =
+        await stockService.uploadCsv(
+          formData
+        );
+
+      console.log(
+        '📥 Réponse serveur:',
+        res
+      );
+
+      /*
+       * Message succès
+       */
       setMessage({
         type: 'success',
         text:
           res?.message ||
-          `${res?.imported_count ?? res?.insertedCount ?? 0} tickets importés avec succès !`,
+          `${res?.imported_count ??
+            res?.insertedCount ??
+            0} ticket(s) importé(s) avec succès !`,
       });
 
+      /*
+       * Reset
+       */
       setFile(null);
-      setRows([{ ...EMPTY_ROW }]);
-      if (inputRef.current) inputRef.current.value = '';
 
-      if (typeof onUploadSuccess === 'function') {
+      setRows([
+        { ...EMPTY_ROW },
+      ]);
+
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
+
+      /*
+       * Callback parent
+       */
+      if (
+        typeof onUploadSuccess ===
+        'function'
+      ) {
         onUploadSuccess();
       }
     } catch (err) {
-      console.error('Erreur import CSV complet:', {
-        error: err,
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-      });
+      console.error(
+        '❌ Erreur import CSV:',
+        {
+          error: err,
+          message: err.message,
+          response:
+            err.response?.data,
+          status:
+            err.response?.status,
+        }
+      );
 
       const errorMessage =
         err.response?.data?.error ||
@@ -388,6 +691,8 @@ export default function CsvUploader({
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+
+      {/* HEADER */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 className="font-semibold text-slate-100 text-sm flex items-center gap-2">
           <UploadCloud className="w-4 h-4 text-blue-400" />
@@ -405,6 +710,7 @@ export default function CsvUploader({
         )}
       </div>
 
+      {/* MESSAGE */}
       {message && (
         <div
           className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
@@ -419,11 +725,18 @@ export default function CsvUploader({
             <AlertCircle className="w-4 h-4 shrink-0" />
           )}
 
-          <span>{message.text}</span>
+          <span>
+            {message.text}
+          </span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+      >
+
+        {/* ZONE */}
         {zones.length > 0 && (
           <div>
             <label className="block text-xs font-medium text-slate-400 mb-1">
@@ -433,17 +746,31 @@ export default function CsvUploader({
             <select
               value={selectedZone}
               onChange={(e) => {
-                setSelectedZone(e.target.value);
-                setSelectedPlan(null);
+                setSelectedZone(
+                  e.target.value
+                );
+
+                setSelectedPlan(
+                  null
+                );
               }}
               disabled={loading}
               className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
             >
+              <option value="">
+                -- Sélectionner une zone --
+              </option>
+
               {zones.map((zone) => {
-                const zoneId = zone._id || zone.id;
+                const zoneId =
+                  zone._id ||
+                  zone.id;
 
                 return (
-                  <option key={zoneId} value={zoneId}>
+                  <option
+                    key={zoneId}
+                    value={zoneId}
+                  >
                     {zone.name}
                   </option>
                 );
@@ -452,6 +779,7 @@ export default function CsvUploader({
           </div>
         )}
 
+        {/* FORFAIT */}
         {selectedZone && (
           <div>
             <label className="block text-xs font-medium text-slate-400 mb-1">
@@ -465,32 +793,56 @@ export default function CsvUploader({
               </div>
             ) : plans.length > 0 ? (
               <select
-                value={selectedPlan?._id || selectedPlan?.id || ''}
+                value={
+                  selectedPlan?._id ||
+                  selectedPlan?.id ||
+                  ''
+                }
                 onChange={(e) => {
-                  const plan = plans.find((p) => (p._id || p.id) === e.target.value);
-                  setSelectedPlan(plan || null);
+                  const plan =
+                    plans.find(
+                      (p) =>
+                        (p._id ||
+                          p.id) ===
+                        e.target.value
+                    );
+
+                  setSelectedPlan(
+                    plan || null
+                  );
                 }}
                 disabled={loading}
                 className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
               >
-                {plans.map((plan) => {
-                  const planId = plan._id || plan.id;
+                {plans.map(
+                  (plan) => {
+                    const planId =
+                      plan._id ||
+                      plan.id;
 
-                  return (
-                    <option key={planId} value={planId}>
-                      {plan.name} — {plan.price} FCFA
-                    </option>
-                  );
-                })}
+                    return (
+                      <option
+                        key={planId}
+                        value={planId}
+                      >
+                        {plan.name} —{' '}
+                        {plan.price}{' '}
+                        FCFA
+                      </option>
+                    );
+                  }
+                )}
               </select>
             ) : (
               <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-[11px] text-red-400">
-                Aucun forfait trouvé pour cette zone.
+                Aucun forfait trouvé
+                pour cette zone.
               </div>
             )}
           </div>
         )}
 
+        {/* CSV */}
         <div>
           <label
             htmlFor="csv-upload"
@@ -499,11 +851,15 @@ export default function CsvUploader({
             <FileText className="w-8 h-8 text-slate-500" />
 
             <span className="text-xs text-slate-300 font-medium text-center">
-              {file ? file.name : 'Cliquez ou glissez votre fichier .CSV ici'}
+              {file
+                ? file.name
+                : 'Cliquez ou glissez votre fichier .CSV ici'}
             </span>
 
             <span className="text-[11px] text-slate-500 text-center">
-              Format accepté : code, password, profile, duration
+              Format accepté :
+              code, password,
+              profile, duration
             </span>
 
             {file && (
@@ -525,91 +881,143 @@ export default function CsvUploader({
               id="csv-upload"
               type="file"
               accept=".csv,text/csv"
-              onChange={handleFileChange}
+              onChange={
+                handleFileChange
+              }
               className="hidden"
             />
           </label>
         </div>
 
+        {/* ENTRÉES MANUELLES */}
         <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-3">
+
           <div className="flex items-center justify-between">
             <label className="text-[11px] font-medium text-slate-400">
               Éléments manuels
             </label>
+
             <button
               type="button"
               onClick={addRow}
-              className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-2 py-1 text-[10px] font-medium text-white hover:bg-blue-500"
+              disabled={loading}
+              className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-2 py-1 text-[10px] font-medium text-white hover:bg-blue-500 disabled:opacity-50"
             >
               <Plus className="w-3 h-3" />
               Ajouter
             </button>
           </div>
 
-          {rows.map((row, index) => (
-            <div
-              key={`row-${index}`}
-              className="grid grid-cols-1 gap-2 rounded-xl border border-slate-800 bg-slate-900 p-2 md:grid-cols-5"
-            >
-              <input
-                type="text"
-                placeholder="code"
-                value={row.code}
-                onChange={(e) => updateRow(index, 'code', e.target.value)}
-                className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500"
-              />
-              <input
-                type="text"
-                placeholder="password"
-                value={row.password}
-                onChange={(e) => updateRow(index, 'password', e.target.value)}
-                className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500"
-              />
-              <input
-                type="text"
-                placeholder="profile"
-                value={row.profile}
-                onChange={(e) => updateRow(index, 'profile', e.target.value)}
-                className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500"
-              />
-              <input
-                type="text"
-                placeholder="duration"
-                value={row.duration}
-                onChange={(e) => updateRow(index, 'duration', e.target.value)}
-                className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500"
-              />
-              <button
-                type="button"
-                onClick={() => removeRow(index)}
-                className="inline-flex items-center justify-center gap-1 rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-2 text-[10px] font-medium text-red-300 hover:bg-red-500/20"
+          {rows.map(
+            (row, index) => (
+              <div
+                key={`row-${index}`}
+                className="grid grid-cols-1 gap-2 rounded-xl border border-slate-800 bg-slate-900 p-2 md:grid-cols-5"
               >
-                <Trash2 className="w-3 h-3" />
-                Supprimer
-              </button>
-            </div>
-          ))}
+                <input
+                  type="text"
+                  placeholder="code"
+                  value={row.code}
+                  onChange={(e) =>
+                    updateRow(
+                      index,
+                      'code',
+                      e.target.value
+                    )
+                  }
+                  disabled={loading}
+                  className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                />
+
+                <input
+                  type="text"
+                  placeholder="password"
+                  value={
+                    row.password
+                  }
+                  onChange={(e) =>
+                    updateRow(
+                      index,
+                      'password',
+                      e.target.value
+                    )
+                  }
+                  disabled={loading}
+                  className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                />
+
+                <input
+                  type="text"
+                  placeholder="profile"
+                  value={
+                    row.profile
+                  }
+                  onChange={(e) =>
+                    updateRow(
+                      index,
+                      'profile',
+                      e.target.value
+                    )
+                  }
+                  disabled={loading}
+                  className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                />
+
+                <input
+                  type="text"
+                  placeholder="duration"
+                  value={
+                    row.duration
+                  }
+                  onChange={(e) =>
+                    updateRow(
+                      index,
+                      'duration',
+                      e.target.value
+                    )
+                  }
+                  disabled={loading}
+                  className="px-2 py-2 bg-slate-800 border border-slate-700 rounded-lg text-[11px] text-slate-200 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    removeRow(index)
+                  }
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-1 rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-2 text-[10px] font-medium text-red-300 hover:bg-red-500/20 disabled:opacity-50"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Supprimer
+                </button>
+              </div>
+            )
+          )}
         </div>
 
+        {/* BOUTON IMPORTATION */}
         <button
           type="submit"
           disabled={
             loading ||
-            (!file && !hasManualEntries) ||
-            !selectedPlan ||
-            !selectedZone ||
             plansLoading
           }
           className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-blue-600/20"
         >
-          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+          {loading && (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          )}
+
           {loading
             ? 'Importation en cours…'
             : plansLoading
             ? 'Chargement du forfait…'
             : "Lancer l'importation"}
         </button>
+
       </form>
     </div>
   );
 }
+

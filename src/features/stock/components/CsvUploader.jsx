@@ -21,7 +21,7 @@ const EMPTY_ROW = {
 /**
  * Parse une ligne CSV en respectant les champs entre guillemets.
  */
-const parseCsvLine = (line = '') => {
+const parseCsvLine = (line = '', separator = ',') => {
   const values = [];
   let current = '';
   let inQuotes = false;
@@ -39,7 +39,7 @@ const parseCsvLine = (line = '') => {
       continue;
     }
 
-    if (char === ',' && !inQuotes) {
+    if (char === separator && !inQuotes) {
       values.push(current.trim());
       current = '';
       continue;
@@ -76,11 +76,12 @@ const parseCsvRows = (csvText = '') => {
     return [];
   }
 
-  const headers = parseCsvLine(rows[0]).map(normalizeHeader);
+  const separator = rows[0].includes(';') && !rows[0].includes(',') ? ';' : ',';
+  const headers = parseCsvLine(rows[0], separator).map(normalizeHeader);
   const parsed = [];
 
   for (let i = 1; i < rows.length; i += 1) {
-    const values = parseCsvLine(rows[i]);
+    const values = parseCsvLine(rows[i], separator);
 
     if (!values.some((value) => String(value).trim())) {
       continue;
@@ -426,7 +427,7 @@ export default function CsvUploader({
        */
       let fileToUpload = file;
 
-      if (normalizedRows.length > 0) {
+      if (!file && normalizedRows.length > 0) {
         const csvPayload =
           buildCsvFromRows(
             normalizedRows

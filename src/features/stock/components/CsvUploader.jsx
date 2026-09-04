@@ -63,6 +63,13 @@ const normalizeHeader = (value = '') =>
     .replace(/^\uFEFF/, '')
     .replace(/[^a-z0-9]/g, '');
 
+const normalizePlanName = (value = '') =>
+  String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+
 /**
  * Parse le contenu CSV.
  */
@@ -418,6 +425,41 @@ export default function CsvUploader({
 
     try {
       setLoading(true);
+
+      const plans = await stockService.getPlansByZone(selectedZone);
+      const availablePlans = Array.isArray(plans)
+        ? plans
+        : plans?.plans || [];
+
+      if (availablePlans.length === 0) {
+        setMessage({
+          type: 'error',
+          text: 'Aucun forfait n’est configuré pour cette zone.',
+        });
+        return;
+      }
+
+      const plansByName = new Map(
+        availablePlans.map((plan) => [normalizePlanName(plan.name), plan])
+      );
+      const hasSinglePlan = availablePlans.length === 1;
+      const invalidProfile = normalizedRows.find((row) => {
+        const profile = String(row.profile || '').trim();
+        const profilePlan = plansByName.get(normalizePlanName(profile));
+        const numericPlan = availablePlans.find(
+          (plan) => String(plan.id) === profile
+        );
+
+        return !hasSinglePlan && !profilePlan && !numericPlan;
+      });
+
+      if (invalidProfile) {
+        setMessage({
+          type: 'error',
+          text: `Le profil « ${invalidProfile.profile} » ne correspond à aucun forfait de cette zone.`,
+        });
+        return;
+      }
 
       /**
        * Si des lignes sont saisies manuellement,

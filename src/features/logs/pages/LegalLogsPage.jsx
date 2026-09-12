@@ -129,7 +129,7 @@ export default function LegalLogsPage() {
             <thead className="uppercase bg-slate-800/50 text-slate-400 border-b border-slate-800">
               <tr>
                 <th className="py-3 px-4">Date & Heure</th>
-                <th className="py-3 px-4">Téléphone (OTP)</th>
+                <th className="py-3 px-4">Téléphone</th>
                 <th className="py-3 px-4">Adresse MAC</th>
                 <th className="py-3 px-4">Adresse IP</th>
                 <th className="py-3 px-4">Zone / Emplacement</th>

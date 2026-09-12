@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import API from '../services/api';
-import { Wifi, Phone, ShieldCheck, CreditCard, Ticket, CheckCircle, Loader2 } from 'lucide-react';
+import { Wifi, Phone, CreditCard, Ticket, CheckCircle, Loader2 } from 'lucide-react';
 
 export default function Portal() {
   const { slug } = useParams(); // Slug de la zone WiFi
 
   // États du flux
-  const [step, setStep] = useState(1); // 1: Forfaits, 2: OTP, 3: Paiement, 4: Succès/Ticket
+  const [step, setStep] = useState(1); // 1: Forfaits, 4: Succès/Ticket
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -18,8 +18,6 @@ export default function Portal() {
   
   // Saisie utilisateur
   const [phone, setPhone] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [transactionRef, setTransactionRef] = useState('');
   const [issuedTicket, setIssuedTicket] = useState(null);
 
@@ -41,37 +39,17 @@ export default function Portal() {
     }
   };
 
-  // 1. Envoi du Code OTP par SMS
-  const handleRequestOtp = async (e) => {
+  // 1. Initialisation du paiement après validation des informations
+  const handlePayment = async (e) => {
     e.preventDefault();
     if (!phone) return setError('Veuillez entrer un numéro de téléphone valide.');
     
     setError('');
     setLoading(true);
     try {
-      await API.post('/otp/request-otp', { phone, zone_id: zone.id });
-      setStep(2); // Passer à la saisie de l'OTP
-    } catch (err) {
-      setError(err.response?.data?.error || 'Erreur lors de l\'envoi du SMS.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 2. Vérification du Code OTP
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    if (!otpCode) return setError('Veuillez saisir le code reçu par SMS.');
-
-    setError('');
-    setLoading(true);
-    try {
-      await API.post('/otp/verify-otp', { phone, code: otpCode });
-      setIsPhoneVerified(true);
-      // Passer directement au paiement après vérification
       initiatePayment();
     } catch (err) {
-      setError(err.response?.data?.error || 'Code OTP incorrect ou expiré.');
+      setError(err.response?.data?.error || 'Erreur lors de l\'initialisation du paiement.');
       setLoading(false);
     }
   };
@@ -178,7 +156,7 @@ export default function Portal() {
           </div>
 
           {selectedPlan && (
-            <form onSubmit={handleRequestOtp} className="mt-6 space-y-3">
+            <form onSubmit={handlePayment} className="mt-6 space-y-3">
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1">
                   Numéro Mobile Money (Orange / MTN)
@@ -201,43 +179,10 @@ export default function Portal() {
                 disabled={loading}
                 className="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-xl text-white flex items-center justify-center gap-2 transition"
               >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Continuer vers la vérification'}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Valider et payer'}
               </button>
             </form>
           )}
-        </div>
-      )}
-
-      {/* ÉTAPE 2 : Validation OTP par SMS */}
-      {step === 2 && (
-        <div className="space-y-4">
-          <div className="text-center">
-            <ShieldCheck className="w-12 h-12 text-blue-400 mx-auto mb-2" />
-            <h2 className="text-xl font-bold">Vérification SMS</h2>
-            <p className="text-xs text-slate-400 mt-1">
-              Un code à 6 chiffres a été envoyé au <span className="text-white font-semibold">{phone}</span>
-            </p>
-          </div>
-
-          <form onSubmit={handleVerifyOtp} className="space-y-4">
-            <input
-              type="text"
-              maxLength={6}
-              required
-              placeholder="000000"
-              value={otpCode}
-              onChange={(e) => setOtpCode(e.target.value)}
-              className="w-full text-center text-2xl tracking-widest py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-blue-500"
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-xl text-white flex items-center justify-center gap-2 transition"
-            >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Valider et Payer'}
-            </button>
-          </form>
         </div>
       )}
 

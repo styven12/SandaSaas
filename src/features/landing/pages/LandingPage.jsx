@@ -56,7 +56,7 @@ export default function LandingPage() {
         </h1>
 
         <p className="text-slate-400 text-lg sm:text-xl max-w-2xl mx-auto">
-          Vendez des tickets d'accès Internet par Mobile Money (Orange, MTN), vérifiez vos utilisateurs par SMS OTP et gérez vos revenus en toute simplicité.
+          Vendez des tickets d'accès Internet par Mobile Money (Orange, MTN), validez les paiements et gérez vos revenus en toute simplicité.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -100,9 +100,9 @@ export default function LandingPage() {
               <div className="p-3 bg-green-500/10 text-green-400 rounded-xl w-fit">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold">Vérification SMS OTP</h3>
+              <h3 className="text-xl font-bold">Validation des accès</h3>
               <p className="text-slate-400 text-sm">
-                Authentifiez vos clients par code SMS unique. Bloquez les abus et conservez un registre d'accès conforme à la loi.
+                Affichez automatiquement le nom d'utilisateur et le mot de passe après la confirmation du paiement.
               </p>
             </div>
 
@@ -120,10 +120,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. PACKS SMS OTP */}
+      {/* 4. PACKS SMS */}
       <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-3xl font-bold">Crédits SMS OTP transparents</h2>
+          <h2 className="text-3xl font-bold">Crédits SMS transparents</h2>
           <p className="text-slate-400 mt-2">Rechargez votre solde d'envois SMS selon la taille de votre réseau.</p>
         </div>
 

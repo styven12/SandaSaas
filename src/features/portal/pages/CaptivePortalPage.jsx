@@ -34,7 +34,7 @@ export default function CaptivePortalPage() {
   const [step, setStep] = useState('SELECT_PLAN'); // SELECT_PLAN | PAYING | SUCCESS
 
   // État après paiement réussi
-  const [purchasedTicket, setPurchasedTicket] = useState(null);
+  const [credentials, setCredentials] = useState(null);
   const [copied, setCopied] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -93,7 +93,7 @@ export default function CaptivePortalPage() {
         const res = await portalService.checkPaymentStatus(txId);
         if (res.status === 'complete') {
           clearInterval(interval);
-          setPurchasedTicket(res.ticket);
+          setCredentials(res.credentials || res.ticket);
           setStep('SUCCESS');
           setPaymentLoading(false);
         } else if (res.status === 'failed') {
@@ -115,9 +115,9 @@ export default function CaptivePortalPage() {
     }, 3000);
   };
 
-  const handleCopyCode = () => {
-    if (purchasedTicket?.code) {
-      navigator.clipboard.writeText(purchasedTicket.code);
+  const handleCopyCredentials = () => {
+    if (credentials?.username && credentials?.password) {
+      navigator.clipboard.writeText(`Utilisateur : ${credentials.username}\nMot de passe : ${credentials.password}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -286,7 +286,7 @@ export default function CaptivePortalPage() {
         </main>
       )}
 
-      {/* ÉTAPE 3 : PAIEMENT RÉUSSI & CODE TICKET */}
+      {/* ÉTAPE 3 : ÉCRAN DE VALIDATION ET IDENTIFIANTS */}
       {step === 'SUCCESS' && (
         <main className="my-auto space-y-4 py-4">
           <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 text-center space-y-4 shadow-2xl">
@@ -296,29 +296,38 @@ export default function CaptivePortalPage() {
             </div>
 
             <div className="space-y-1">
-              <h3 className="font-extrabold text-white text-lg">Paiement Confirmé !</h3>
-              <p className="text-xs text-slate-400">Voici votre code d'accès WiFi personnel</p>
+              <h3 className="font-extrabold text-white text-lg">Validation réussie !</h3>
+              <p className="text-xs text-slate-400">Voici vos identifiants personnels pour vous connecter au WiFi</p>
             </div>
 
-            {/* Ticket Affiché */}
-            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-2">
-              <div className="text-[11px] text-slate-500 uppercase font-semibold">Code WiFi / Ticket</div>
-              <div className="text-3xl font-black font-mono text-emerald-400 tracking-wider select-all">
-                {purchasedTicket?.code || 'WIFI88'}
+            {/* Identifiants affichés après validation du paiement */}
+            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-4 text-left">
+              <div>
+                <div className="text-[11px] text-slate-500 uppercase font-semibold">Nom d'utilisateur</div>
+                <div className="text-xl font-black font-mono text-emerald-400 tracking-wider select-all">
+                  {credentials?.username}
+                </div>
               </div>
-              <button
-                onClick={handleCopyCode}
-                className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-lg transition"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? 'Copié !' : 'Copier le code'}
-              </button>
+              <div>
+                <div className="text-[11px] text-slate-500 uppercase font-semibold">Mot de passe</div>
+                <div className="text-xl font-black font-mono text-emerald-400 tracking-wider select-all">
+                  {credentials?.password}
+                </div>
+              </div>
             </div>
+
+            <button
+              onClick={handleCopyCredentials}
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-lg transition"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? 'Identifiants copiés !' : 'Copier les identifiants'}
+            </button>
 
             {/* Bouton Connexion Automatique MikroTik */}
             <form action={linkLogin} method="post" className="pt-2">
-              <input type="hidden" name="username" value={purchasedTicket?.code || ''} />
-              <input type="hidden" name="password" value={purchasedTicket?.password || purchasedTicket?.code || ''} />
+              <input type="hidden" name="username" value={credentials?.username || ''} />
+              <input type="hidden" name="password" value={credentials?.password || ''} />
               <input type="hidden" name="dst" value="https://google.com" />
               
               <button

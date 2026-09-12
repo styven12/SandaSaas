@@ -19,7 +19,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { label: 'Zones & Bornes', path: '/dashboard/zones', icon: Radio },
     { label: 'Stock de Tickets', path: '/dashboard/stock', icon: Ticket },
     { label: 'Comptabilité & Retraits', path: '/dashboard/finance', icon: Wallet },
-    { label: 'Boutique SMS OTP', path: '/dashboard/sms', icon: MessageSquare },
+    { label: 'Boutique SMS', path: '/dashboard/sms', icon: MessageSquare },
     { label: 'Registre Légal', path: '/dashboard/logs', icon: FileText },
     { label: 'Support Client', path: '/dashboard/support', icon: HelpCircle },
     { label: 'Paramètres', path: '/dashboard/settings', icon: Settings },

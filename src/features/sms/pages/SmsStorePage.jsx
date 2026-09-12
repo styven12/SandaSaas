@@ -91,9 +91,9 @@ export default function SmsStorePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
         <div className="space-y-1">
           <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-purple-400" /> Boutique SMS OTP
+            <MessageSquare className="w-5 h-5 text-purple-400" /> Boutique SMS
           </h1>
-          <p className="text-xs text-slate-400">Rechargez votre solde pour envoyer les codes de vérification SMS à vos clients</p>
+          <p className="text-xs text-slate-400">Rechargez votre solde pour envoyer des notifications SMS à vos clients</p>
         </div>
         
         <div className="bg-purple-500/10 border border-purple-500/20 px-4 py-3 rounded-xl flex items-center gap-3 shrink-0">

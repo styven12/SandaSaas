@@ -7,12 +7,6 @@ export const portalService = {
     return response.data;
   },
 
-  // Demande l'envoi d'un code OTP par SMS
-  requestOtp: async (phone, zoneId) => {
-    const response = await API.post('/otp/request-otp', { phone, zone_id: zoneId });
-    return response.data;
-  },
-
   // Initier le paiement Mobile Money
   initiatePayment: async (paymentData) => {
     const response = await API.post('/payments/initiate', {

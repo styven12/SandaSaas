@@ -28,7 +28,7 @@ export default function KpiCards({ stats }) {
       bg: 'bg-amber-500/10 border-amber-500/20'
     },
     {
-      title: 'Solde SMS OTP',
+      title: 'Solde SMS',
       value: stats?.smsBalance || 0,
       subtitle: 'Crédits pour l\'authentification',
       icon: MessageSquare,

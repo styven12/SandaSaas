@@ -5,6 +5,7 @@ import {
   LayoutDashboard, 
   Radio, 
   Ticket, 
+  ListChecks,
   Wallet, 
   MessageSquare, 
   FileText, 
@@ -17,6 +18,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const navItems = [
     { label: 'Vue d\'ensemble', path: '/dashboard/overview', icon: LayoutDashboard },
     { label: 'Zones & Bornes', path: '/dashboard/zones', icon: Radio },
+    { label: 'Forfaits', path: '/dashboard/plans', icon: ListChecks },
     { label: 'Stock de Tickets', path: '/dashboard/stock', icon: Ticket },
     { label: 'Comptabilité & Retraits', path: '/dashboard/finance', icon: Wallet },
     { label: 'Boutique SMS', path: '/dashboard/sms', icon: MessageSquare },

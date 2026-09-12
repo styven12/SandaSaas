@@ -34,4 +34,14 @@ export const stockService = {
     const response = await API.get(`/plans/zone/${wifi_zone_id}`);
     return response.data;
   },
+
+  updatePlan: async (planId, planData) => {
+    const response = await API.put(`/plans/${planId}`, planData);
+    return response.data;
+  },
+
+  deletePlan: async (planId) => {
+    const response = await API.delete(`/plans/${planId}`);
+    return response.data;
+  },
 };

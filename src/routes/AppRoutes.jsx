@@ -13,6 +13,7 @@ import CaptivePortalPage from '../features/portal/pages/CaptivePortalPage';
 // Protected Dashboard Pages
 import OverviewPage from '../features/dashboard/pages/OverviewPage';
 import ZonesPage from '../features/zones/pages/ZonesPage';
+import PlansPage from '../features/plans/pages/PlansPage';
 import StockPage from '../features/stock/pages/StockPage';
 import FinancePage from '../features/finance/pages/FinancePage';
 import SmsStorePage from '../features/sms/pages/SmsStorePage';
@@ -40,6 +41,7 @@ export default function AppRoutes() {
           <Route index element={<Navigate to="/dashboard/overview" replace />} />
           <Route path="overview" element={<OverviewPage />} />
           <Route path="zones" element={<ZonesPage />} />
+          <Route path="plans" element={<PlansPage />} />
           <Route path="stock" element={<StockPage />} />
           <Route path="finance" element={<FinancePage />} />
           <Route path="sms" element={<SmsStorePage />} />

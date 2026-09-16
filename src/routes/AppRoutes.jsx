@@ -23,6 +23,9 @@ import SettingsPage from '../features/settings/pages/SettingsPage';
 
 // Guard
 import ProtectedRoute from '../components/common/ProtectedRoute';
+import AdminProtectedRoute from '../components/common/AdminProtectedRoute';
+import AdminLoginPage from '../features/admin/pages/AdminLoginPage';
+import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage';
 
 export default function AppRoutes() {
   return (
@@ -31,6 +34,7 @@ export default function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/admin/login" element={<AdminLoginPage />} />
       
       {/* Portail Captif Client (Mobile First) */}
       <Route path="/portal/:slug" element={<CaptivePortalPage />} />
@@ -49,6 +53,10 @@ export default function AppRoutes() {
           <Route path="support" element={<SupportPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
+      </Route>
+
+      <Route element={<AdminProtectedRoute />}>
+        <Route path="/admin" element={<AdminDashboardPage />} />
       </Route>
 
       {/* Redirection 404 par défaut */}

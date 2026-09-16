@@ -14,7 +14,10 @@ const API = axios.create({
 // Intercepteur pour injecter le token JWT dans chaque requête gérant
 API.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const isAdminRequest = String(config.url || '').startsWith('/admin');
+    const token = isAdminRequest
+      ? (localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken'))
+      : (localStorage.getItem('token') || sessionStorage.getItem('token'));
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -36,7 +39,7 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (error.response && error.response.status === 401 && !String(error.config?.url || '').startsWith('/admin')) {
       localStorage.removeItem('token');
       localStorage.removeItem('tenant');
       sessionStorage.removeItem('token');

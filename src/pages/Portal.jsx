@@ -78,7 +78,15 @@ export default function Portal() {
     const query = new URLSearchParams(window.location.search);
     const ref = query.get('reference');
     if (ref) {
+      let attempts = 0;
+      const interval = setInterval(async () => {
+        attempts += 1;
+        const complete = await checkPaymentStatus(ref);
+        if (complete || attempts >= 15) clearInterval(interval);
+      }, 2000);
+
       checkPaymentStatus(ref);
+      return () => clearInterval(interval);
     }
   }, []);
 
@@ -89,6 +97,7 @@ export default function Portal() {
       const res = await API.get(`/payments/status/${ref}`);
       if (res.data.status === 'complete') {
         setIssuedTicket(res.data.ticket);
+        return true;
       } else {
         setError('Le paiement est toujours en cours de traitement ou a échoué.');
       }
@@ -97,6 +106,7 @@ export default function Portal() {
     } finally {
       setLoading(false);
     }
+    return false;
   };
 
   if (loading && !zone) {

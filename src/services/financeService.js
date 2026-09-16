@@ -17,6 +17,11 @@ export const financeService = {
     return response.data;
   },
 
+  getLedger: async () => {
+    const response = await API.get('/finance/ledger');
+    return response.data;
+  },
+
   // Demander un retrait vers Mobile Money
   requestPayout: async (payoutData) => {
     const response = await API.post('/finance/withdraw', {

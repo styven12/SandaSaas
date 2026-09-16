@@ -5,7 +5,7 @@ import { Wallet, ArrowUpRight, Clock, Loader2, CheckCircle2, AlertCircle, X } fr
 export default function BalanceCard({ balanceData, onPayoutRequested }) {
   const [showModal, setShowModal] = useState(false);
   const [amount, setAmount] = useState('');
-  const [phone, setPhone] = useState(balanceData?.payoutPhone || '');
+  const [phone, setPhone] = useState(balanceData?.payoutPhone || balanceData?.phone_payout || '');
   const [provider, setProvider] = useState('CM_OM'); // CM_OM ou CM_MOMO
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -39,7 +39,7 @@ export default function BalanceCard({ balanceData, onPayoutRequested }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Solde Disponible */}
         <div className="bg-gradient-to-br from-blue-900/40 to-slate-900 border border-blue-500/30 p-6 rounded-2xl flex items-center justify-between shadow-xl">
           <div className="space-y-2">
@@ -68,6 +68,19 @@ export default function BalanceCard({ balanceData, onPayoutRequested }) {
           </div>
           <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl">
             <Clock className="w-6 h-6" />
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center justify-between">
+          <div className="space-y-2">
+            <span className="text-xs font-semibold text-emerald-400 tracking-wider uppercase">Crédits SMS</span>
+            <div className="text-3xl font-bold text-slate-200 tracking-tight">
+              {(balanceData?.sms_balance || 0).toLocaleString('fr-FR')}
+            </div>
+            <p className="text-[11px] text-slate-500">Messages disponibles</p>
+          </div>
+          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl">
+            <span className="text-lg font-bold">SMS</span>
           </div>
         </div>
       </div>
@@ -103,7 +116,7 @@ export default function BalanceCard({ balanceData, onPayoutRequested }) {
                 <input
                   type="number"
                   required
-                  min="500"
+                  min="1000"
                   max={balanceData?.available || 0}
                   placeholder="Ex: 10000"
                   value={amount}

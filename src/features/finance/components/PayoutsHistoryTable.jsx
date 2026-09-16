@@ -5,6 +5,7 @@ export default function PayoutsHistoryTable({ payouts }) {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'SUCCESS':
+      case 'processed':
       case 'PAID':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -12,12 +13,15 @@ export default function PayoutsHistoryTable({ payouts }) {
           </span>
         );
       case 'PENDING':
+      case 'pending':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
             <Clock className="w-3 h-3" /> Traitement...
           </span>
         );
-      default:
+      case 'FAILED':
+      case 'failed':
+      case 'rejected':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-red-500/10 text-red-400 border border-red-500/20">
             <XCircle className="w-3 h-3" /> Rejeté
@@ -47,11 +51,11 @@ export default function PayoutsHistoryTable({ payouts }) {
                 <tr key={p._id || p.id} className="hover:bg-slate-800/30 transition">
                   <td className="py-3 px-4 font-bold text-white">{p.reference || p._id?.substring(0, 8)}</td>
                   <td className="py-3 px-4 font-bold text-emerald-400">{p.amount} FCFA</td>
-                  <td className="py-3 px-4 text-slate-300">{p.phone}</td>
-                  <td className="py-3 px-4 font-sans uppercase text-slate-400">{p.provider || 'Mobile Money'}</td>
+                  <td className="py-3 px-4 text-slate-300">{p.phone_number || p.phone || '-'}</td>
+                  <td className="py-3 px-4 font-sans uppercase text-slate-400">{p.payment_method || p.provider || 'Mobile Money'}</td>
                   <td className="py-3 px-4 font-sans">{getStatusBadge(p.status)}</td>
                   <td className="py-3 px-4 text-right font-sans text-slate-500">
-                    {new Date(p.createdAt).toLocaleDateString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(p.created_at || p.createdAt).toLocaleDateString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                   </td>
                 </tr>
               ))

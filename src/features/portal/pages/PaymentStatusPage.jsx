@@ -108,7 +108,7 @@ export default function PaymentStatusPage() {
             <div className="space-y-2">
               <h3 className="text-lg font-bold text-white">Validation en cours...</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Veuillez valider le retrait sur votre téléphone portable (USSD Orange Money ou MTN MoMo).
+                Veuillez valider le paiement sur votre téléphone portable (USSD Orange Money ou MTN MoMo).
               </p>
             </div>
 

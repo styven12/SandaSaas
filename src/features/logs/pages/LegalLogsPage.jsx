@@ -148,7 +148,7 @@ export default function LegalLogsPage() {
                 logs.map((log) => (
                   <tr key={log._id || log.id} className="hover:bg-slate-800/30 transition">
                     <td className="py-3 px-4 font-sans text-slate-400">
-                      {new Date(log.createdAt || log.timestamp).toLocaleDateString('fr-FR', {
+                      {new Date(log.session_start || log.createdAt || log.timestamp).toLocaleDateString('fr-FR', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -158,10 +158,10 @@ export default function LegalLogsPage() {
                       })}
                     </td>
                     <td className="py-3 px-4 font-bold text-white">{log.phone || 'Non vérifié'}</td>
-                    <td className="py-3 px-4 text-blue-400">{log.macAddress || log.mac || '00:00:00:00:00:00'}</td>
-                    <td className="py-3 px-4 text-emerald-400">{log.ipAddress || log.ip || '192.168.88.X'}</td>
-                    <td className="py-3 px-4 font-sans text-slate-300">{log.zoneName || log.zone?.name || 'Principale'}</td>
-                    <td className="py-3 px-4 text-right font-bold text-slate-400">{log.ticketCode || '-'}</td>
+                    <td className="py-3 px-4 text-blue-400">{log.mac_address || log.macAddress || log.mac || '-'}</td>
+                    <td className="py-3 px-4 text-emerald-400">{log.ip_address || log.ipAddress || log.ip || '-'}</td>
+                    <td className="py-3 px-4 font-sans text-slate-300">{log.zone_name || log.zoneName || log.zone?.name || '-'}</td>
+                    <td className="py-3 px-4 text-right font-bold text-slate-400">{log.username || log.ticketCode || '-'}</td>
                   </tr>
                 ))
               ) : (

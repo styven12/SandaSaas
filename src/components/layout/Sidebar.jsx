@@ -35,7 +35,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           <div className="p-2 bg-blue-600 rounded-xl text-white shadow-md shadow-blue-600/20">
             <Wifi className="w-5 h-5" />
           </div>
-          <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+          <span className="font-bold text-lg tracking-tight bg-linear-to-r from-white to-slate-400 bg-clip-text text-transparent">
             Sanda WiFi
           </span>
         </div>

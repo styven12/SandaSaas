@@ -6,6 +6,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 
 // Public & Portal Pages
 import LandingPage from '../features/landing/pages/LandingPage';
+import PricingPage from '../features/landing/pages/PricingPage';
 import LoginPage from '../features/auth/pages/LoginPage';
 import RegisterPage from '../features/auth/pages/RegisterPage';
 import CaptivePortalPage from '../features/portal/pages/CaptivePortalPage';
@@ -26,12 +27,15 @@ import ProtectedRoute from '../components/common/ProtectedRoute';
 import AdminProtectedRoute from '../components/common/AdminProtectedRoute';
 import AdminLoginPage from '../features/admin/pages/AdminLoginPage';
 import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage';
+import AboutPage from '../features/landing/pages/about';
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* Routes Publics */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/tarifs" element={<PricingPage />} />
+      <Route path='/abouts' element={<AboutPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />

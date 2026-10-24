@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://broadwaresaas.onrender.com/api';
+const defaultApiBaseUrl = import.meta.env.DEV
+  ? 'http://localhost:3000/api'
+  : 'https://broadwaresaas.onrender.com/api';
+const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL || defaultApiBaseUrl;
 const normalizedBaseUrl = configuredBaseUrl.replace(/\/+$/, '');
 const baseURL = normalizedBaseUrl.endsWith('/api') ? normalizedBaseUrl : `${normalizedBaseUrl}/api`;
 

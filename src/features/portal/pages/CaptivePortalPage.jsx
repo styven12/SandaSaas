@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { portalService } from '../../../services/portalService';
 import { 
@@ -91,17 +91,23 @@ export default function CaptivePortalPage() {
         ip
       });
 
+      const checkoutUrl = new URL(res.payment_url);
+      if (
+        checkoutUrl.protocol !== 'https:'
+        || !(checkoutUrl.hostname === 'notchpay.co' || checkoutUrl.hostname.endsWith('.notchpay.co'))
+      ) {
+        throw new Error('Adresse de paiement Notch Pay invalide.');
+      }
+
       setStep('PAYING');
-      
-      // Polling de vérification du statut du paiement Mobile Money (max 45 secondes)
-      pollTransactionStatus(res.reference);
+      window.location.assign(checkoutUrl.href);
     } catch (err) {
-      setError(err.response?.data?.error || "Échec de l'initialisation du paiement.");
+      setError(err.response?.data?.error || err.message || "Échec de l'initialisation du paiement.");
       setPaymentLoading(false);
     }
   };
 
-  const pollTransactionStatus = (txId) => {
+  const pollTransactionStatus = useCallback((txId) => {
     let attempts = 0;
     const interval = setInterval(async () => {
       attempts += 1;
@@ -122,14 +128,23 @@ export default function CaptivePortalPage() {
         console.error(err);
       }
 
-      if (attempts >= 15) { // Arrêt après 45s (15 x 3s)
+      if (attempts >= 60) { // Arrêt après 3 minutes.
         clearInterval(interval);
-        setError("Temps d'attente dépassé. Si le montant a été débité, vérifiez vos SMS.");
+        setError("Temps d'attente dépassé. Si vous avez validé le paiement, vérifiez vos SMS ou réessayez dans quelques instants.");
         setStep('SELECT_PLAN');
         setPaymentLoading(false);
       }
     }, 3000);
-  };
+    return () => clearInterval(interval);
+  }, []);
+
+  const paymentReference = searchParams.get('reference');
+  useEffect(() => {
+    if (!paymentReference) return undefined;
+    setStep('PAYING');
+    setPaymentLoading(true);
+    return pollTransactionStatus(paymentReference);
+  }, [paymentReference, pollTransactionStatus]);
 
   const handleCopyCredentials = () => {
     if (credentials?.username && credentials?.password) {
@@ -258,7 +273,7 @@ export default function CaptivePortalPage() {
               <input
                 type="tel"
                 required
-                placeholder="6XX XXX XXX"
+                placeholder="+237 670 000 000"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500 font-mono"

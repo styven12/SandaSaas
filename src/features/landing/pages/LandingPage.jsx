@@ -90,7 +90,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb] text-slate-900">
+    <div className="landing-page-shell min-h-screen bg-[#f5f7fb] text-slate-900">
       <header className="sticky top-0 z-50 py-4">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="rounded-full border border-slate-200/80 bg-white/80 px-4 py-3 shadow-[0_15px_35px_rgba(15,23,42,0.06)] backdrop-blur-xl">

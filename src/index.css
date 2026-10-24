@@ -43,46 +43,88 @@ a {
   min-height: 100vh;
 }
 
-/* Keep legacy administration screens on the same light canvas as the landing page. */
-.dashboard-shell .bg-slate-950,
-.dashboard-shell .bg-slate-900 {
-  background-color: #fff !important;
+/* Brand theme: deep blue surfaces with soft blue-gray text and indigo highlights. */
+.landing-page-shell {
+  background: #0b1220 !important;
+  color: #e2e8f0 !important;
 }
 
-.dashboard-shell .bg-slate-800 {
-  background-color: #f8fafc !important;
+.landing-page-shell [class~="bg-[#f5f7fb]"],
+.landing-page-shell .bg-white\/80,
+.landing-page-shell .bg-white {
+  background-color: #111c32 !important;
 }
 
-.dashboard-shell .bg-slate-950:has(pre) {
-  background-color: #020617 !important;
+.landing-page-shell .bg-slate-50,
+.landing-page-shell .bg-slate-100 {
+  background-color: #1a2942 !important;
 }
 
-.dashboard-shell .border-slate-800,
-.dashboard-shell .border-slate-700,
-.dashboard-shell .border-slate-700\/50 {
-  border-color: #e2e8f0 !important;
+.landing-page-shell a.bg-slate-900,
+.landing-page-shell button.bg-slate-900,
+.dashboard-shell a.bg-slate-900,
+.dashboard-shell button.bg-slate-900 {
+  background-color: #4f46e5 !important;
 }
 
-.dashboard-shell :is(h1, h2, h3, h4, p, span, label, td, th, div).text-white,
-.dashboard-shell :is(h1, h2, h3, h4, p, span, label, td, th, div).text-slate-100,
-.dashboard-shell :is(h1, h2, h3, h4, p, span, label, td, th, div).text-slate-200 {
-  color: #0f172a !important;
+.landing-page-shell a.bg-slate-900:hover,
+.landing-page-shell button.bg-slate-900:hover,
+.dashboard-shell a.bg-slate-900:hover,
+.dashboard-shell button.bg-slate-900:hover {
+  background-color: #4338ca !important;
 }
 
-.dashboard-shell :is(p, span, label, td, th, div).text-slate-300 {
-  color: #475569 !important;
+.landing-page-shell [class*="border-slate-200"] {
+  border-color: #273750 !important;
 }
 
-.dashboard-shell :is(p, span, label, td, th, div).text-slate-400 {
-  color: #64748b !important;
+.landing-page-shell .text-slate-950,
+.landing-page-shell .text-slate-900 {
+  color: #f1f5f9 !important;
+}
+
+.landing-page-shell .text-slate-700 {
+  color: #d5deeb !important;
+}
+
+.landing-page-shell .text-slate-600,
+.landing-page-shell .text-slate-500 {
+  color: #9eacc2 !important;
+}
+
+.landing-page-shell footer {
+  background-color: #0e192c !important;
+}
+
+.dashboard-shell .bg-white {
+  background-color: #0f172a !important;
+}
+
+.dashboard-shell .bg-slate-50 {
+  background-color: #111c32 !important;
+}
+
+.dashboard-shell [class*="border-slate-200"],
+.dashboard-shell [class*="border-slate-300"] {
+  border-color: #334155 !important;
+}
+
+.dashboard-shell .text-slate-950,
+.dashboard-shell .text-slate-900 {
+  color: #f1f5f9 !important;
+}
+
+.dashboard-shell .text-slate-700,
+.dashboard-shell .text-slate-600 {
+  color: #cbd5e1 !important;
 }
 
 .dashboard-shell input,
 .dashboard-shell select,
 .dashboard-shell textarea {
-  color: #0f172a;
-  background-color: #fff;
-  border-color: #cbd5e1;
+  color: #f1f5f9;
+  background-color: #111c32;
+  border-color: #334155;
 }
 
 .dashboard-shell input::placeholder,

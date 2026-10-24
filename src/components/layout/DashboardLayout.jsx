@@ -7,7 +7,7 @@ export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="dashboard-shell min-h-screen flex bg-[#f5f7fb] text-slate-900">
+    <div className="dashboard-shell min-h-screen flex bg-slate-950 text-slate-100">
       {/* Overlay mobile quand la sidebar est ouverte */}
       {sidebarOpen && (
         <div 

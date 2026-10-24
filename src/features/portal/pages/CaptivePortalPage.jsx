@@ -21,7 +21,23 @@ export default function CaptivePortalPage() {
   // Extraction des paramètres transmis automatiquement par le routeur MikroTik
   const mac = searchParams.get('mac') || '';
   const ip = searchParams.get('ip') || '';
-  const linkLogin = searchParams.get('link-login') || 'http://wifi.sanda.net/login';
+  const linkLogin = (() => {
+    const candidate = searchParams.get('link-login');
+    const allowedHosts = (import.meta.env.VITE_MIKROTIK_LOGIN_HOSTS || '')
+      .split(',')
+      .map((host) => host.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (!candidate || allowedHosts.length === 0) return '';
+
+    try {
+      const loginUrl = new URL(candidate);
+      if (loginUrl.protocol !== 'https:' || !allowedHosts.includes(loginUrl.hostname.toLowerCase())) return '';
+      return loginUrl.href;
+    } catch {
+      return '';
+    }
+  })();
 
   const [portalData, setPortalData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -324,8 +340,8 @@ export default function CaptivePortalPage() {
               {copied ? 'Identifiants copiés !' : 'Copier les identifiants'}
             </button>
 
-            {/* Bouton Connexion Automatique MikroTik */}
-            <form action={linkLogin} method="post" className="pt-2">
+            {/* The router login destination is accepted only over HTTPS and from an explicit host allowlist. */}
+            {linkLogin ? <form action={linkLogin} method="post" className="pt-2">
               <input type="hidden" name="username" value={credentials?.username || ''} />
               <input type="hidden" name="password" value={credentials?.password || ''} />
               <input type="hidden" name="dst" value="https://google.com" />
@@ -336,7 +352,9 @@ export default function CaptivePortalPage() {
               >
                 <Wifi className="w-5 h-5" /> Se Connecter à Internet
               </button>
-            </form>
+            </form> : <p className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs leading-5 text-amber-200">
+              La connexion automatique est désactivée pour ce routeur. Copiez vos identifiants et connectez-vous depuis la page HTTPS du Hotspot.
+            </p>}
 
           </div>
         </main>

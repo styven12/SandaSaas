@@ -34,6 +34,10 @@ img {
   max-width: 100%;
 }
 
+svg {
+  flex-shrink: 0;
+}
+
 button,
 a {
   transition: all 0.2s ease;
@@ -41,6 +45,52 @@ a {
 
 #root {
   min-height: 100vh;
+}
+
+@media (max-width: 767px) {
+  .dashboard-shell,
+  .dashboard-shell main,
+  .landing-page-shell {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .dashboard-shell main > *,
+  .dashboard-shell main section,
+  .dashboard-shell main article {
+    min-width: 0;
+  }
+
+  .dashboard-shell table,
+  .landing-page-shell table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dashboard-shell th,
+  .dashboard-shell td {
+    white-space: nowrap;
+  }
+
+  .dashboard-shell th:first-child,
+  .dashboard-shell td:first-child {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 380px) {
+  .dashboard-shell main {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .landing-page-shell header {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
 }
 
 /* Brand theme: deep blue surfaces with soft blue-gray text and indigo highlights. */

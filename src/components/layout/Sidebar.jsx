@@ -29,7 +29,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   return (
     <aside className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col justify-between border-r border-slate-800 bg-slate-900 transition-transform duration-300 md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-      <div>
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {/* LOGO */}
         <div className="flex h-16 items-center gap-3 border-b border-slate-800 px-6">
           <div className="rounded-xl bg-indigo-600 p-2 text-white shadow-md shadow-indigo-600/20">
@@ -41,7 +41,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         </div>
 
         {/* MENU DE NAVIGATION */}
-        <nav className="space-y-1.5 p-4">
+        <nav className="space-y-1.5 p-3 sm:p-4">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -66,7 +66,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       </div>
 
       {/* PIED DE LA SIDEBAR */}
-      <div className="border-t border-slate-800 p-4 text-center text-xs text-slate-500">
+      <div className="shrink-0 border-t border-slate-800 p-4 text-center text-xs text-slate-500">
         Wifisanda · Espace professionnel
       </div>
     </aside>

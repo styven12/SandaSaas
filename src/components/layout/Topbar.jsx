@@ -12,6 +12,7 @@ export default function Topbar({ setIsOpen }) {
       <div className="flex items-center gap-3">
         <button
           onClick={() => setIsOpen(prev => !prev)}
+          aria-label="Ouvrir le menu de navigation"
           className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white md:hidden"
         >
           <Menu className="w-6 h-6" />

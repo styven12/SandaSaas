@@ -38,7 +38,7 @@ export default function OverviewPage() {
     <div className="space-y-6">
       
       {/* En-tête de la Page */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-xl font-bold text-white tracking-tight">Vue d'ensemble</h1>
           <p className="text-xs text-slate-400">Aperçu en temps réel des performances de vos zones WiFi</p>

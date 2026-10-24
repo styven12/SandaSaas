@@ -6,8 +6,6 @@ export default function CreateZoneModal({ onClose, onCreated }) {
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
-    dnsName: 'wifi.sanda.net',
-    currency: 'XAF'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -40,15 +38,15 @@ export default function CreateZoneModal({ onClose, onCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+      <div role="dialog" aria-modal="true" className="w-full max-w-md space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
         
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div className="flex items-center gap-2 text-white font-semibold text-sm">
-            <Radio className="w-4 h-4 text-blue-400" />
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <Radio className="h-4 w-4 text-indigo-600" />
             <span>Ajouter une Nouvelle Zone WiFi</span>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white rounded-lg">
+          <button aria-label="Fermer" onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-900">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -61,7 +59,7 @@ export default function CreateZoneModal({ onClose, onCreated }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Nom de l'emplacement</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Nom de l'emplacement</label>
             <input
               type="text"
               name="name"
@@ -69,12 +67,12 @@ export default function CreateZoneModal({ onClose, onCreated }) {
               placeholder="Ex: Agency Douala Akwa"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Identifiant URL (Slug)</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Identifiant URL (Slug)</label>
             <input
               type="text"
               name="slug"
@@ -82,20 +80,7 @@ export default function CreateZoneModal({ onClose, onCreated }) {
               placeholder="douala-akwa"
               value={formData.slug}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-300 font-mono focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Nom DNS Hotspot (MikroTik)</label>
-            <input
-              type="text"
-              name="dnsName"
-              required
-              placeholder="wifi.sanda.net"
-              value={formData.dnsName}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-blue-500"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-mono text-sm text-slate-700 outline-none focus:border-indigo-500"
             />
           </div>
 
@@ -103,14 +88,14 @@ export default function CreateZoneModal({ onClose, onCreated }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl font-medium"
+              className="rounded-xl bg-slate-100 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-200"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow-lg shadow-blue-600/20"
+              className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-slate-700"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Créer la zone

@@ -20,8 +20,8 @@ export default function AboutPage() {
 
    const links = [
     { name: 'Services', href: '#features' },
-    { name: 'Tarifs', href: 'tarifs' },
-    { name: 'À propos', href: 'abouts' },
+    { name: 'Tarifs', href: '/tarifs' },
+    { name: 'À propos', href: '/abouts' },
   ];
 
   const values = [

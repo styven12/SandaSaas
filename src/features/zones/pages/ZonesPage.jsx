@@ -31,7 +31,7 @@ export default function ZonesPage() {
     try {
       const res = await zoneService.getMikrotikScript(zone._id || zone.id);
       setActiveZone(zone);
-      setSelectedScript(res.script);
+      setSelectedScript(typeof res === 'string' ? res : res.script);
     } catch (err) {
       alert("Erreur lors de la récupération du script.");
     }
@@ -54,12 +54,12 @@ export default function ZonesPage() {
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Zones & Bornes WiFi</h1>
-          <p className="text-xs text-slate-400">Gérez vos emplacements et générez leurs scripts de configuration MikroTik</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-950">Zones WiFi</h1>
+          <p className="mt-1 text-sm text-slate-600">Gérez vos emplacements et préparez la configuration de vos routeurs MikroTik.</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl transition shadow-lg shadow-blue-600/20"
+          className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-700"
         >
           <Plus className="w-4 h-4" /> Nouvelle Zone
         </button>
@@ -73,35 +73,35 @@ export default function ZonesPage() {
       ) : zones.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {zones.map((zone) => (
-            <div key={zone._id || zone.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+          <div key={zone._id || zone.id} className="flex flex-col justify-between space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
               
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="p-2 bg-blue-600/10 border border-blue-500/20 rounded-xl text-blue-400">
+                    <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-2 text-indigo-700">
                     <Radio className="w-5 h-5" />
                   </div>
                   <button
                     onClick={() => handleDelete(zone._id || zone.id)}
-                    className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg transition"
+                    className="rounded-lg p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-slate-100 text-base">{zone.name}</h3>
-                  <p className="text-xs font-mono text-slate-500">Slug: {zone.slug}</p>
+                  <h3 className="text-base font-bold text-slate-900">{zone.name}</h3>
+                  <p className="font-mono text-xs text-slate-500">/{zone.slug}</p>
                 </div>
               </div>
 
               {/* URL Portail public */}
-              <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between text-xs">
-                <span className="text-slate-400 truncate">/portal/{zone.slug}</span>
+              <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs">
+                <span className="truncate text-slate-600">/portal/{zone.slug}</span>
                 <a
                   href={`/portal/${zone.slug}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-blue-400 hover:text-blue-300 flex items-center gap-1 shrink-0"
+                  className="flex shrink-0 items-center gap-1 font-semibold text-indigo-700 hover:text-indigo-900"
                 >
                   Tester <ExternalLink className="w-3 h-3" />
                 </a>
@@ -110,19 +110,19 @@ export default function ZonesPage() {
               {/* Bouton Script MikroTik */}
               <button
                 onClick={() => handleShowScript(zone)}
-                className="w-full py-2 bg-slate-800 hover:bg-slate-700/80 border border-slate-700/50 text-slate-200 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-sm font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-800"
               >
-                <Terminal className="w-4 h-4 text-emerald-400" /> Générer Script MikroTik
+                <Terminal className="h-4 w-4 text-indigo-600" /> Générer le script MikroTik
               </button>
 
             </div>
           ))}
         </div>
       ) : (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-3">
-          <Radio className="w-10 h-10 text-slate-600 mx-auto" />
-          <div className="text-sm font-semibold text-slate-300">Aucune zone WiFi configurée</div>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+        <div className="space-y-3 rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
+          <Radio className="mx-auto h-10 w-10 text-slate-400" />
+          <div className="text-sm font-semibold text-slate-800">Aucune zone WiFi configurée</div>
+          <p className="mx-auto max-w-sm text-sm text-slate-500">
             Créez votre première zone pour générer automatiquement le script de configuration pour votre routeur MikroTik.
           </p>
         </div>

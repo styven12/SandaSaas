@@ -43,3 +43,50 @@ a {
   min-height: 100vh;
 }
 
+/* Keep legacy administration screens on the same light canvas as the landing page. */
+.dashboard-shell .bg-slate-950,
+.dashboard-shell .bg-slate-900 {
+  background-color: #fff !important;
+}
+
+.dashboard-shell .bg-slate-800 {
+  background-color: #f8fafc !important;
+}
+
+.dashboard-shell .bg-slate-950:has(pre) {
+  background-color: #020617 !important;
+}
+
+.dashboard-shell .border-slate-800,
+.dashboard-shell .border-slate-700,
+.dashboard-shell .border-slate-700\/50 {
+  border-color: #e2e8f0 !important;
+}
+
+.dashboard-shell :is(h1, h2, h3, h4, p, span, label, td, th, div).text-white,
+.dashboard-shell :is(h1, h2, h3, h4, p, span, label, td, th, div).text-slate-100,
+.dashboard-shell :is(h1, h2, h3, h4, p, span, label, td, th, div).text-slate-200 {
+  color: #0f172a !important;
+}
+
+.dashboard-shell :is(p, span, label, td, th, div).text-slate-300 {
+  color: #475569 !important;
+}
+
+.dashboard-shell :is(p, span, label, td, th, div).text-slate-400 {
+  color: #64748b !important;
+}
+
+.dashboard-shell input,
+.dashboard-shell select,
+.dashboard-shell textarea {
+  color: #0f172a;
+  background-color: #fff;
+  border-color: #cbd5e1;
+}
+
+.dashboard-shell input::placeholder,
+.dashboard-shell textarea::placeholder {
+  color: #94a3b8;
+}
+

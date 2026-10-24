@@ -19,8 +19,8 @@ export default function LandingPage() {
 
   const links = [
     { name: 'Services', href: '#features' },
-    { name: 'Tarifs', href: 'tarifs' },
-    { name: 'À propos', href: 'abouts' },
+    { name: 'Tarifs', href: '/tarifs' },
+    { name: 'À propos', href: '#about' },
   ];
 
   const featureCards = [
@@ -100,7 +100,7 @@ export default function LandingPage() {
                   <Wifi className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold tracking-tight text-slate-900">Broadware</div>
+                  <div className="text-lg font-bold tracking-tight text-slate-900">Wifisanda</div>
                 </div>
               </Link>
 
@@ -120,7 +120,7 @@ export default function LandingPage() {
                 <Link
                 to="/dashboard"
                 className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
-                  Dashbord
+                  Tableau de bord
                 </Link>
                 <Link
                   to="/login"
@@ -169,7 +169,7 @@ export default function LandingPage() {
 
       <main>
         <section className="relative overflow-hidden">
-          <div className="absolute inset-x-0 top-0 -z-10 h-[520] bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_38%),radial-gradient(circle_at_top_right,_rgba(14,165,233,0.10),_transparent_30%)]" />
+          <div className="absolute inset-x-0 top-0 -z-10 h-[520px] bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_38%),radial-gradient(circle_at_top_right,_rgba(14,165,233,0.10),_transparent_30%)]" />
 
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
             <div className="grid items-center gap-12 lg:grid-cols-[1.06fr_0.94fr]">
@@ -290,7 +290,7 @@ export default function LandingPage() {
                 </h2>
 
                 <p className="text-base leading-8 text-slate-600">
-                  Broadware centralise les paiements, l’accès client, le suivi des performances et la gestion des tickets pour vous offrir un cadre clair et scalable.
+                  Wifisanda centralise les paiements, l’accès client, le suivi des performances et la gestion des tickets pour vous offrir un cadre clair et simple à piloter.
                 </p>
 
                 <div className="space-y-4">
@@ -347,7 +347,7 @@ export default function LandingPage() {
                 <img
                   src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80"
                   alt="Tableau de bord de gestion WiFi"
-                  className="h-[420] w-full rounded-[24] object-cover"
+                  className="h-[420px] w-full rounded-[24px] object-cover"
                 />
               </div>
             </div>
@@ -411,7 +411,7 @@ export default function LandingPage() {
 
         <div className="border-t border-slate-200">
           <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <p>© 2026 Broadware. Tous droits réservés.</p>
+            <p>© 2026 Wifisanda. Tous droits réservés.</p>
             <div className="flex items-center gap-5">
               <a href="#" className="transition hover:text-slate-900">CGV</a>
               <a href="#" className="transition hover:text-slate-900">Confidentialité</a>

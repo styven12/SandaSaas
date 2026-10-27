@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
-  Check,
   Globe,
   Headphones,
   Menu,
@@ -19,7 +18,7 @@ export default function AboutPage() {
   const [open, setOpen] = useState(false);
 
    const links = [
-    { name: 'Services', href: '#features' },
+    { name: 'Services', href: '/#features' },
     { name: 'Tarifs', href: '/tarifs' },
     { name: 'À propos', href: '/abouts' },
   ];
@@ -63,20 +62,20 @@ export default function AboutPage() {
   const footerColumns = [
     {
       title: 'Produit',
-      links: ['Forfaits', 'Fonctionnalités', 'Sécurité'],
+      links: [{ label: 'Tarification', href: '/tarifs#pricing' }, { label: 'Fonctionnalités', href: '/#features' }, { label: 'Sécurité', href: '/abouts#security' }],
     },
     {
       title: 'Entreprise',
-      links: ['À propos', 'Blog', 'Support'],
+      links: [{ label: 'À propos', href: '/abouts' }, { label: 'Créer un compte', href: '/register' }, { label: 'Support WhatsApp', href: 'https://wa.me/237695434556' }],
     },
     {
       title: 'Contact',
-      links: ['hello@broadware.io', '+225 00 00 00 00', 'Abidjan, Côte d’Ivoire'],
+      links: [{ label: 'hello@broadware.io', href: 'mailto:hello@broadware.io' }],
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb] text-slate-900">
+    <div className="landing-page-shell min-h-screen bg-[#f5f7fb] text-slate-900">
 
       {/* ================= HEADER ================= */}
       <header className="sticky top-0 z-50 py-4">
@@ -88,7 +87,7 @@ export default function AboutPage() {
                         <Wifi className="h-5 w-5" />
                       </div>
                       <div>
-                        <div className="text-lg font-bold tracking-tight text-slate-900">Broadware</div>
+                        <div className="text-lg font-bold tracking-tight text-slate-900">Wifisanda</div>
                       </div>
                     </Link>
       
@@ -176,7 +175,7 @@ export default function AboutPage() {
 
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-md">
                   <Sparkles className="h-3.5 w-3.5" />
-                  À propos de Broadware
+                  À propos de Wifisanda
                 </div>
 
                 <h1 className="text-4xl font-black tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
@@ -207,7 +206,7 @@ export default function AboutPage() {
               <img
                 src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1200&q=85"
                 alt="Collaboration et technologie"
-                className="h-[330] w-full rounded-[22px] object-cover sm:h-[390]"
+                className="h-[330px] w-full rounded-[22px] object-cover sm:h-[390px]"
               />
 
             </div>
@@ -225,7 +224,7 @@ export default function AboutPage() {
               </h2>
 
               <p className="text-base leading-8 text-slate-600">
-                Broadware est une plateforme dédiée à la gestion et à la
+                Wifisanda est une plateforme dédiée à la gestion et à la
                 monétisation des réseaux WiFi. Notre objectif est de réunir
                 dans un même environnement les outils nécessaires à la vente
                 d'accès Internet, à la gestion des forfaits et au suivi de
@@ -254,7 +253,7 @@ export default function AboutPage() {
         <div className="mx-auto h-1 w-44 rounded-full bg-slate-900" />
 
         {/* ================= VALUES ================= */}
-        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
+        <section id="security" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
 
           <div className="mx-auto mb-10 max-w-2xl text-center">
 
@@ -263,7 +262,7 @@ export default function AboutPage() {
             </p>
 
             <h2 className="mt-3 text-3xl font-black tracking-[-0.05em] text-slate-950 sm:text-4xl">
-              Ce qui guide notre façon de construire Broadware.
+              Ce qui guide notre façon de construire Wifisanda.
             </h2>
 
           </div>
@@ -378,9 +377,9 @@ export default function AboutPage() {
               <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.16em] text-slate-900">{column.title}</h3>
               <ul className="space-y-3 text-sm text-slate-600">
                 {column.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="transition hover:text-slate-900">
-                      {link}
+                  <li key={link.label}>
+                    <a href={link.href} className="transition hover:text-slate-900">
+                      {link.label}
                     </a>
                   </li>
                 ))}
@@ -391,10 +390,10 @@ export default function AboutPage() {
 
         <div className="border-t border-slate-200">
           <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <p>© 2026 Broadware. Tous droits réservés.</p>
+            <p>© 2026 Wifisanda. Tous droits réservés.</p>
             <div className="flex items-center gap-5">
-              <a href="#" className="transition hover:text-slate-900">CGV</a>
-              <a href="#" className="transition hover:text-slate-900">Confidentialité</a>
+              <Link to="/cgv" className="transition hover:text-slate-900">CGV</Link>
+              <Link to="/confidentialite" className="transition hover:text-slate-900">Confidentialité</Link>
             </div>
           </div>
         </div>

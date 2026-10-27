@@ -28,6 +28,7 @@ import AdminProtectedRoute from '../components/common/AdminProtectedRoute';
 import AdminLoginPage from '../features/admin/pages/AdminLoginPage';
 import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage';
 import AboutPage from '../features/landing/pages/about';
+import LegalPlaceholderPage from '../features/landing/pages/LegalPlaceholderPage';
 
 export default function AppRoutes() {
   return (
@@ -36,6 +37,8 @@ export default function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/tarifs" element={<PricingPage />} />
       <Route path='/abouts' element={<AboutPage />} />
+      <Route path="/cgv" element={<LegalPlaceholderPage title="Conditions générales" />} />
+      <Route path="/confidentialite" element={<LegalPlaceholderPage title="Politique de confidentialité" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />

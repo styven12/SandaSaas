@@ -97,6 +97,7 @@ a {
 .landing-page-shell {
   background: #0b1220 !important;
   color: #e2e8f0 !important;
+  overflow-x: clip;
 }
 
 .landing-page-shell [class~="bg-[#f5f7fb]"],
@@ -108,6 +109,19 @@ a {
 .landing-page-shell .bg-slate-50,
 .landing-page-shell .bg-slate-100 {
   background-color: #1a2942 !important;
+}
+
+.landing-page-shell .bg-indigo-50,
+.landing-page-shell .bg-blue-50 {
+  background-color: #1b2942 !important;
+}
+
+.landing-page-shell .bg-indigo-100,
+.landing-page-shell .bg-blue-100,
+.landing-page-shell .bg-violet-100,
+.landing-page-shell .bg-emerald-100,
+.landing-page-shell .bg-amber-100 {
+  background-color: #223654 !important;
 }
 
 .landing-page-shell a.bg-slate-900,
@@ -140,6 +154,15 @@ a {
 .landing-page-shell .text-slate-600,
 .landing-page-shell .text-slate-500 {
   color: #9eacc2 !important;
+}
+
+.landing-page-shell .text-indigo-700,
+.landing-page-shell .text-indigo-600,
+.landing-page-shell .text-blue-700,
+.landing-page-shell .text-violet-700,
+.landing-page-shell .text-emerald-700,
+.landing-page-shell .text-amber-700 {
+  color: #a5b4fc !important;
 }
 
 .landing-page-shell footer {

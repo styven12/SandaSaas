@@ -54,9 +54,9 @@ export default function LandingPage() {
     {
       image:
         'https://images.unsplash.com/photo-1516321165247-4aa89a48be28?auto=format&fit=crop&w=900&q=80',
-      title: 'Bots de captation',
-      text: 'Collectez des contacts et donnez accès à des audiences qualifiées grâce aux campagnes d’acquisition.',
-      tag: 'Acquisition',
+      title: 'Configuration MikroTik',
+      text: 'Générez le script de configuration de vos routeurs depuis chaque zone WiFi.',
+      tag: 'Mise en service',
     },
     {
       image:
@@ -77,15 +77,15 @@ export default function LandingPage() {
   const footerColumns = [
     {
       title: 'Produit',
-      links: ['Forfaits', 'Fonctionnalités', 'Sécurité'],
+      links: [{ label: 'Tarification', href: '/tarifs#pricing' }, { label: 'Fonctionnalités', href: '/#features' }, { label: 'Sécurité', href: '/abouts#security' }],
     },
     {
       title: 'Entreprise',
-      links: ['À propos', 'Blog', 'Support'],
+      links: [{ label: 'À propos', href: '/abouts' }, { label: 'Créer un compte', href: '/register' }, { label: 'Support WhatsApp', href: 'https://wa.me/237695434556' }],
     },
     {
       title: 'Contact',
-      links: ['hello@broadware.io', '+225 00 00 00 00', 'Abidjan, Côte d’Ivoire'],
+      links: [{ label: 'hello@broadware.io', href: 'mailto:hello@broadware.io' }],
     },
   ];
 
@@ -225,6 +225,7 @@ export default function LandingPage() {
                 <div className="absolute -right-10 bottom-0 h-36 w-36 rounded-full bg-cyan-200/60 blur-3xl" />
 
                 <div className="relative overflow-hidden rounded-[30px] border border-slate-200 bg-slate-950 p-5 shadow-[0_30px_60px_rgba(15,23,42,0.16)]">
+                  <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Aperçu · données de démonstration</p>
                   <div className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
                     <div>
                       <div className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Chiffre d'affaires</div>
@@ -331,9 +332,9 @@ export default function LandingPage() {
 
                 <div className="space-y-3">
                   {[
-                    { label: 'Taux de conversion', value: '+34%' },
-                    { label: 'Marge moyenne', value: '72%' },
-                    { label: 'Temps de setup', value: '5 min' },
+                    { label: 'Revenus WiFi', value: 'Suivi' },
+                    { label: 'Stock des tickets', value: 'Par forfait' },
+                    { label: 'Scripts MikroTik', value: 'Génération' },
                   ].map((item) => (
                     <div key={item.label} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                       <span className="text-slate-600">{item.label}</span>
@@ -398,9 +399,9 @@ export default function LandingPage() {
               <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.16em] text-slate-900">{column.title}</h3>
               <ul className="space-y-3 text-sm text-slate-600">
                 {column.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="transition hover:text-slate-900">
-                      {link}
+                  <li key={link.label}>
+                    <a href={link.href} className="transition hover:text-slate-900">
+                      {link.label}
                     </a>
                   </li>
                 ))}
@@ -413,8 +414,8 @@ export default function LandingPage() {
           <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <p>© 2026 Wifisanda. Tous droits réservés.</p>
             <div className="flex items-center gap-5">
-              <a href="#" className="transition hover:text-slate-900">CGV</a>
-              <a href="#" className="transition hover:text-slate-900">Confidentialité</a>
+              <Link to="/cgv" className="transition hover:text-slate-900">CGV</Link>
+              <Link to="/confidentialite" className="transition hover:text-slate-900">Confidentialité</Link>
             </div>
           </div>
         </div>

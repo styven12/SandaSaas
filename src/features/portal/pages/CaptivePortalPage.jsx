@@ -48,6 +48,9 @@ export default function CaptivePortalPage() {
   const [phone, setPhone] = useState('');
   const [provider, setProvider] = useState('CM_OM'); // CM_OM ou CM_MOMO
   const [step, setStep] = useState('SELECT_PLAN'); // SELECT_PLAN | PAYING | SUCCESS
+  const [whatsappConsent, setWhatsappConsent] = useState(false);
+  const [whatsappStatus, setWhatsappStatus] = useState('');
+  const [ticketDeliveryPhone, setTicketDeliveryPhone] = useState('');
 
   // État après paiement réussi
   const [credentials, setCredentials] = useState(null);
@@ -116,6 +119,8 @@ export default function CaptivePortalPage() {
         if (res.status === 'complete') {
           clearInterval(interval);
           setCredentials(res.credentials || res.ticket);
+          setWhatsappStatus(res.whatsapp_status || 'not_configured');
+          setTicketDeliveryPhone(res.whatsapp_phone || phone);
           setStep('SUCCESS');
           setPaymentLoading(false);
         } else if (res.status === 'failed') {
@@ -279,10 +284,23 @@ export default function CaptivePortalPage() {
                 className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500 font-mono"
               />
             </div>
+            <p className="text-[11px] leading-5 text-slate-400">
+              Ce numéro recevra le paiement Mobile Money et le message WhatsApp avec vos identifiants WiFi.
+            </p>
+            <label className="flex items-start gap-2 text-xs leading-5 text-slate-300">
+              <input
+                type="checkbox"
+                required
+                checked={whatsappConsent}
+                onChange={(event) => setWhatsappConsent(event.target.checked)}
+                className="mt-1 accent-blue-500"
+              />
+              <span>J’accepte de recevoir mes identifiants de connexion par WhatsApp à ce numéro.</span>
+            </label>
 
             <button
               type="submit"
-              disabled={paymentLoading || !phone}
+              disabled={paymentLoading || !phone || !whatsappConsent}
               className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-blue-600/30"
             >
               {paymentLoading ? (
@@ -329,6 +347,18 @@ export default function CaptivePortalPage() {
             <div className="space-y-1">
               <h3 className="font-extrabold text-white text-lg">Validation réussie !</h3>
               <p className="text-xs text-slate-400">Voici vos identifiants personnels pour vous connecter au WiFi</p>
+            </div>
+
+            <div className={`rounded-xl border p-3 text-left text-xs leading-5 ${
+              whatsappStatus === 'sent'
+                ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+                : 'border-amber-500/20 bg-amber-500/10 text-amber-200'
+            }`}>
+              {whatsappStatus === 'sent'
+                ? `Les identifiants ont été envoyés par WhatsApp au ${ticketDeliveryPhone}.`
+                : whatsappStatus === 'sending' || whatsappStatus === 'pending'
+                  ? `Envoi du message WhatsApp au ${ticketDeliveryPhone} en cours.`
+                  : 'Le message WhatsApp n’a pas pu être envoyé. Vos identifiants restent disponibles ci-dessous.'}
             </div>
 
             {/* Identifiants affichés après validation du paiement */}

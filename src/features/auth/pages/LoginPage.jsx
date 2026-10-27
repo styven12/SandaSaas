@@ -30,7 +30,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb]  text-slate-100 flex items-center justify-center p-4">
+    <div className="landing-page-shell min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8 bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl">
         
         {/* En-tête */}

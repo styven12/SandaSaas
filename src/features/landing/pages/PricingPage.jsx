@@ -4,6 +4,7 @@ import {
   Globe,
   Headphones,
   Menu,
+  Sparkles,
   ShieldCheck,
   Wifi,
   X,
@@ -55,15 +56,15 @@ export default function PricingPage() {
   const footerColumns = [
     {
       title: 'Produit',
-      links: ['Forfaits', 'Fonctionnalités', 'Sécurité'],
+      links: [{ label: 'Tarification', href: '/tarifs#pricing' }, { label: 'Fonctionnalités', href: '/#features' }, { label: 'Sécurité', href: '/abouts#security' }],
     },
     {
       title: 'Entreprise',
-      links: ['À propos', 'Blog', 'Support'],
+      links: [{ label: 'À propos', href: '/abouts' }, { label: 'Créer un compte', href: '/register' }, { label: 'Support WhatsApp', href: 'https://wa.me/237695434556' }],
     },
     {
       title: 'Contact',
-      links: ['hello@broadware.io', '+225 00 00 00 00', 'Abidjan, Côte d’Ivoire'],
+      links: [{ label: 'hello@broadware.io', href: 'mailto:hello@broadware.io' }],
     },
   ];
 
@@ -170,7 +171,8 @@ export default function PricingPage() {
           <div className="mx-auto max-w-3xl rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-[0_18px_40px_rgba(15,23,42,0.05)] sm:p-12">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-700">Tarification transparente</p>
             <h2 className="mt-3 text-3xl font-black tracking-[-0.05em] text-slate-950 sm:text-4xl">Vous fixez le prix de vos accès WiFi.</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600">Wifisanda ne vous impose pas de forfait mensuel fictif. Créez vos zones, définissez vos prix en FCFA et gérez vos tickets depuis l’espace professionnel.</p>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600">Aucun abonnement mensuel. Wifisanda prélève 5 % sur chaque vente de ticket confirmée. Les frais de paiement Notch Pay sont facturés séparément.</p>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-500">Exemple : pour un ticket vendu 1 000 FCFA, la commission Wifisanda est de 50 FCFA et votre solde reçoit 950 FCFA, avant les frais Notch Pay.</p>
             <div className="mt-7 flex flex-wrap justify-center gap-3 text-sm text-slate-700">
               {['Prix par zone', 'Paiement Mobile Money', 'Gestion des tickets'].map((item) => <span key={item} className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2">{item}</span>)}
             </div>
@@ -209,9 +211,9 @@ export default function PricingPage() {
               <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.16em] text-slate-900">{column.title}</h3>
               <ul className="space-y-3 text-sm text-slate-600">
                 {column.links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="transition hover:text-slate-900">
-                      {link}
+                  <li key={link.label}>
+                    <a href={link.href} className="transition hover:text-slate-900">
+                      {link.label}
                     </a>
                   </li>
                 ))}
@@ -224,8 +226,8 @@ export default function PricingPage() {
           <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <p>© 2026 Wifisanda. Tous droits réservés.</p>
             <div className="flex items-center gap-5">
-              <a href="#" className="transition hover:text-slate-900">CGV</a>
-              <a href="#" className="transition hover:text-slate-900">Confidentialité</a>
+              <Link to="/cgv" className="transition hover:text-slate-900">CGV</Link>
+              <Link to="/confidentialite" className="transition hover:text-slate-900">Confidentialité</Link>
             </div>
           </div>
         </div>

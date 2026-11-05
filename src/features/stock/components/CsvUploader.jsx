@@ -909,8 +909,7 @@ export default function CsvUploader({
                     const plan =
                       plans.find(
                         (p) =>
-                          (p._id ||
-                            p.id) ===
+                          String(p._id || p.id) ===
                           e.target.value
                       );
 
@@ -1338,4 +1337,3 @@ export default function CsvUploader({
     </div>
   );
 }
-

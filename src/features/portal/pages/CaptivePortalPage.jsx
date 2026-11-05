@@ -11,7 +11,7 @@ import {
   Loader2, 
   Copy, 
   Check, 
-  AlertCircle,
+  AlertCircle
 } from 'lucide-react';
 
 export default function CaptivePortalPage() {
@@ -46,7 +46,8 @@ export default function CaptivePortalPage() {
   // État du formulaire d'achat
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [phone, setPhone] = useState('');
-  const [provider, setProvider] = useState('CM_OM'); // CM_OM ou CM_MOMO
+  const [whatsappPhone, setWhatsappPhone] = useState('');
+  const [planPage, setPlanPage] = useState(0);
   const [step, setStep] = useState('SELECT_PLAN'); // SELECT_PLAN | PAYING | SUCCESS
   const [whatsappConsent, setWhatsappConsent] = useState(false);
   const [whatsappStatus, setWhatsappStatus] = useState('');
@@ -56,6 +57,9 @@ export default function CaptivePortalPage() {
   const [credentials, setCredentials] = useState(null);
   const [copied, setCopied] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const plans = portalData?.plans || [];
+  const planPageCount = Math.ceil(plans.length / 4);
+  const visiblePlans = plans.slice(planPage * 4, planPage * 4 + 4);
 
   // Charger les forfaits et infos de la zone
   useEffect(() => {
@@ -64,6 +68,7 @@ export default function CaptivePortalPage() {
       try {
         const data = await portalService.getPortalInfo(slug);
         setPortalData(data);
+        setPlanPage(0);
         if (data.plans && data.plans.length > 0) {
           setSelectedPlan(data.plans[0]);
         }
@@ -89,7 +94,7 @@ export default function CaptivePortalPage() {
         zoneId: portalData?.zone?._id || portalData?.zone?.id,
         planId: selectedPlan._id || selectedPlan.id,
         phone,
-        provider,
+        whatsappPhone,
         mac,
         ip
       });
@@ -112,17 +117,21 @@ export default function CaptivePortalPage() {
 
   const pollTransactionStatus = useCallback((txId) => {
     let attempts = 0;
+    let paymentCompleted = false;
     const interval = setInterval(async () => {
       attempts += 1;
       try {
         const res = await portalService.checkPaymentStatus(txId);
         if (res.status === 'complete') {
-          clearInterval(interval);
+          paymentCompleted = true;
           setCredentials(res.credentials || res.ticket);
           setWhatsappStatus(res.whatsapp_status || 'not_configured');
-          setTicketDeliveryPhone(res.whatsapp_phone || phone);
+          setTicketDeliveryPhone(res.whatsapp_phone || '');
           setStep('SUCCESS');
           setPaymentLoading(false);
+          if (['sent', 'not_configured'].includes(res.whatsapp_status)) {
+            clearInterval(interval);
+          }
         } else if (res.status === 'failed') {
           clearInterval(interval);
           setError("Paiement échoué ou annulé sur votre téléphone.");
@@ -133,13 +142,16 @@ export default function CaptivePortalPage() {
         console.error(err);
       }
 
-      if (attempts >= 60) { // Arrêt après 3 minutes.
+      if (attempts >= 60) { // Vérification WhatsApp pendant cinq minutes.
         clearInterval(interval);
-        setError("Temps d'attente dépassé. Si vous avez validé le paiement, vérifiez vos SMS ou réessayez dans quelques instants.");
-        setStep('SELECT_PLAN');
+        if (paymentCompleted) {
+          setWhatsappStatus((current) => ['sent', 'not_configured'].includes(current) ? current : 'failed');
+        } else {
+          setError("Le serveur n’a pas pu confirmer le paiement à temps. Ne relancez pas le paiement ; actualisez cette page ou contactez le support.");
+        }
         setPaymentLoading(false);
       }
-    }, 3000);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -169,7 +181,7 @@ export default function CaptivePortalPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex flex-col justify-between p-4 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between p-4 max-w-md mx-auto">
       
       {/* EN-TÊTE DU PORTAIL */}
       <header className="text-center space-y-2 pt-4">
@@ -194,102 +206,66 @@ export default function CaptivePortalPage() {
 
       {/* ÉTAPE 1 : SELECTION DU FORFAIT ET PAIEMENT */}
       {step === 'SELECT_PLAN' && (
-        <main className="w-full space-y-5 my-4">
+        <main className="space-y-5 my-4">
           
           {/* Liste des Forfaits */}
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between gap-3 px-1">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                1. Choisissez votre forfait
-              </label>
-              <span className="shrink-0 text-[11px] text-slate-500">
-                {portalData?.plans?.length || 0} offre(s)
-              </span>
-            </div>
-            <div
-              aria-label="Forfaits disponibles"
-              className={`grid max-h-[min(55vh,560px)] gap-3 overflow-y-auto overscroll-contain px-1 py-1 [scrollbar-color:#475569_transparent] [scrollbar-width:thin] ${
-                portalData?.plans?.length <= 2
-                  ? 'grid-cols-1 sm:grid-cols-2'
-                  : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4'
-              }`}
-            >
-                {portalData?.plans?.map((plan) => {
-                  const isSelected = String(selectedPlan?._id || selectedPlan?.id) === String(plan._id || plan.id);
-                  return (
-                    <button
-                      type="button"
-                      key={plan._id || plan.id}
-                      onClick={() => setSelectedPlan(plan)}
-                      aria-pressed={isSelected}
-                      className={`flex min-h-32 w-full flex-col justify-between rounded-2xl border p-4 text-left transition-all duration-300 ease-out ${
-                        isSelected
-                          ? 'scale-[1.01] border-blue-400 bg-blue-500/15 text-white ring-2 ring-blue-500/40 shadow-lg shadow-blue-500/15'
-                          : 'border-slate-800 bg-slate-900 text-slate-300 hover:-translate-y-0.5 hover:border-slate-600'
-                      }`}
-                    >
-                      <div className="space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="line-clamp-2 text-sm font-bold">{plan.name}</span>
-                          {plan.badge && (
-                            <span className="shrink-0 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-medium text-blue-300">
-                              {plan.badge}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
-                          {plan.duration && (
-                            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {plan.duration}</span>
-                          )}
-                          {plan.speed && (
-                            <span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5" /> {plan.speed}</span>
-                          )}
-                        </div>
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block px-1">
+              1. Choisissez votre forfait
+            </label>
+            <div className="grid grid-cols-1 gap-2.5">
+              {visiblePlans.map((plan) => {
+                const isSelected = selectedPlan?._id === plan._id || selectedPlan?.id === plan.id;
+                return (
+                  <div
+                    key={plan._id || plan.id}
+                    onClick={() => setSelectedPlan(plan)}
+                    className={`p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between ${
+                      isSelected
+                        ? 'bg-blue-600/15 border-blue-500 text-white shadow-lg shadow-blue-500/10'
+                        : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="space-y-1">
+                      <div className="font-bold text-sm flex items-center gap-2">
+                        <span>{plan.name}</span>
+                        {plan.badge && (
+                          <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-mono">
+                            {plan.badge}
+                          </span>
+                        )}
                       </div>
-                      <div className="mt-4 flex w-full items-center justify-between gap-2">
-                        <span className="text-base font-extrabold text-emerald-400">{plan.price} FCFA</span>
-                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${
-                          isSelected ? 'border-blue-500 bg-blue-500' : 'border-slate-700'
-                        }`}>
-                          {isSelected && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
-                        </span>
+                      <div className="text-xs text-slate-400 flex items-center gap-3">
+                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {plan.duration}</span>
+                        <span className="flex items-center gap-1"><Zap className="w-3.5 h-3.5" /> {plan.speed || 'Haut Débit'}</span>
                       </div>
-                    </button>
-                  );
-                })}
+                    </div>
+                    <div className="text-right">
+                      <div className="text-base font-extrabold text-emerald-400">{plan.price} FCFA</div>
+                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center ml-auto mt-1 ${
+                        isSelected ? 'border-blue-500 bg-blue-500' : 'border-slate-700'
+                      }`}>
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+            {planPageCount > 1 && (
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <button type="button" onClick={() => setPlanPage((page) => Math.max(0, page - 1))} disabled={planPage === 0} className="rounded-xl border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 disabled:opacity-40">Précédent</button>
+                <span className="text-xs text-slate-400">Page {planPage + 1} sur {planPageCount}</span>
+                <button type="button" onClick={() => setPlanPage((page) => Math.min(planPageCount - 1, page + 1))} disabled={planPage >= planPageCount - 1} className="rounded-xl border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 disabled:opacity-40">Suivant</button>
+              </div>
+            )}
           </div>
 
           {/* Formulaire de Paiement Mobile Money */}
-          <form onSubmit={handlePayment} className="mx-auto w-full max-w-xl space-y-3 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+          <form onSubmit={handlePayment} className="space-y-3 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
               2. Numéro Mobile Money
             </label>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setProvider('CM_OM')}
-                className={`py-2 rounded-xl text-xs font-bold border transition ${
-                  provider === 'CM_OM'
-                    ? 'bg-orange-500/20 border-orange-500 text-orange-400'
-                    : 'bg-slate-800 border-slate-700 text-slate-400'
-                }`}
-              >
-                Orange Money
-              </button>
-              <button
-                type="button"
-                onClick={() => setProvider('CM_MOMO')}
-                className={`py-2 rounded-xl text-xs font-bold border transition ${
-                  provider === 'CM_MOMO'
-                    ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400'
-                    : 'bg-slate-800 border-slate-700 text-slate-400'
-                }`}
-              >
-                MTN MoMo
-              </button>
-            </div>
 
             <div className="relative">
               <Smartphone className="w-5 h-5 text-slate-500 absolute left-3 top-2.5" />
@@ -303,8 +279,21 @@ export default function CaptivePortalPage() {
               />
             </div>
             <p className="text-[11px] leading-5 text-slate-400">
-              Ce numéro recevra le paiement Mobile Money et le message WhatsApp avec vos identifiants WiFi.
+              Ce numéro sera utilisé pour confirmer le paiement Mobile Money.
             </p>
+            <label htmlFor="whatsapp-phone" className="block text-xs font-semibold text-slate-300">Numéro WhatsApp pour recevoir vos identifiants</label>
+            <div className="relative">
+              <Smartphone className="w-5 h-5 text-slate-500 absolute left-3 top-2.5" />
+              <input
+                id="whatsapp-phone"
+                type="tel"
+                required
+                placeholder="+237 670 000 000"
+                value={whatsappPhone}
+                onChange={(event) => setWhatsappPhone(event.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500 font-mono"
+              />
+            </div>
             <label className="flex items-start gap-2 text-xs leading-5 text-slate-300">
               <input
                 type="checkbox"
@@ -313,12 +302,12 @@ export default function CaptivePortalPage() {
                 onChange={(event) => setWhatsappConsent(event.target.checked)}
                 className="mt-1 accent-blue-500"
               />
-              <span>J’accepte de recevoir mes identifiants de connexion par WhatsApp à ce numéro.</span>
+              <span>J’accepte de recevoir mes identifiants de connexion par WhatsApp au numéro indiqué ci-dessus.</span>
             </label>
 
             <button
               type="submit"
-              disabled={paymentLoading || !phone || !whatsappConsent}
+              disabled={paymentLoading || !phone || !whatsappPhone || !whatsappConsent}
               className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-blue-600/30"
             >
               {paymentLoading ? (
@@ -373,10 +362,10 @@ export default function CaptivePortalPage() {
                 : 'border-amber-500/20 bg-amber-500/10 text-amber-200'
             }`}>
               {whatsappStatus === 'sent'
-                ? `Les identifiants ont été envoyés par WhatsApp au ${ticketDeliveryPhone}.`
+                ? `WhatsApp a accepté l’envoi des identifiants au ${ticketDeliveryPhone}.`
                 : whatsappStatus === 'sending' || whatsappStatus === 'pending'
                   ? `Envoi du message WhatsApp au ${ticketDeliveryPhone} en cours.`
-                  : 'Le message WhatsApp n’a pas pu être envoyé. Vos identifiants restent disponibles ci-dessous.'}
+                  : 'L’envoi WhatsApp n’a pas été confirmé. Vos identifiants restent disponibles ci-dessous.'}
             </div>
 
             {/* Identifiants affichés après validation du paiement */}

@@ -12,6 +12,7 @@ export const portalService = {
     const response = await API.post('/payments/initiate', {
       plan_id: paymentData.plan_id || paymentData.planId,
       phone: paymentData.phone,
+      whatsapp_phone: paymentData.whatsappPhone,
       email: paymentData.email,
     });
     return response.data;

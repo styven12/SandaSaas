@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { portalService } from '../../../services/portalService';
 import { 
@@ -12,8 +12,6 @@ import {
   Copy, 
   Check, 
   AlertCircle,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 
 export default function CaptivePortalPage() {
@@ -53,7 +51,6 @@ export default function CaptivePortalPage() {
   const [whatsappConsent, setWhatsappConsent] = useState(false);
   const [whatsappStatus, setWhatsappStatus] = useState('');
   const [ticketDeliveryPhone, setTicketDeliveryPhone] = useState('');
-  const plansScrollerRef = useRef(null);
 
   // État après paiement réussi
   const [credentials, setCredentials] = useState(null);
@@ -162,16 +159,6 @@ export default function CaptivePortalPage() {
     }
   };
 
-  const scrollPlans = (direction) => {
-    const scroller = plansScrollerRef.current;
-    if (!scroller) return;
-
-    scroller.scrollBy({
-      left: direction * scroller.clientWidth * 0.8,
-      behavior: 'smooth',
-    });
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4">
@@ -211,35 +198,22 @@ export default function CaptivePortalPage() {
           
           {/* Liste des Forfaits */}
           <div className="space-y-2.5">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block px-1">
-              1. Choisissez votre forfait
-            </label>
-            <div className="relative">
-              {portalData?.plans?.length > 4 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => scrollPlans(-1)}
-                    aria-label="Afficher les forfaits précédents"
-                    className="absolute -left-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-700 bg-slate-900 p-2 text-slate-300 shadow-lg transition hover:scale-105 hover:border-blue-500 hover:text-white"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => scrollPlans(1)}
-                    aria-label="Afficher les forfaits suivants"
-                    className="absolute -right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-700 bg-slate-900 p-2 text-slate-300 shadow-lg transition hover:scale-105 hover:border-blue-500 hover:text-white"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </>
-              )}
-              <div
-                ref={plansScrollerRef}
-                aria-label="Forfaits disponibles"
-                className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto scroll-smooth px-1 pb-3 [scrollbar-width:thin] [scrollbar-color:#475569_transparent]"
-              >
+            <div className="flex items-center justify-between gap-3 px-1">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                1. Choisissez votre forfait
+              </label>
+              <span className="shrink-0 text-[11px] text-slate-500">
+                {portalData?.plans?.length || 0} offre(s)
+              </span>
+            </div>
+            <div
+              aria-label="Forfaits disponibles"
+              className={`grid max-h-[min(55vh,560px)] gap-3 overflow-y-auto overscroll-contain px-1 py-1 [scrollbar-color:#475569_transparent] [scrollbar-width:thin] ${
+                portalData?.plans?.length <= 2
+                  ? 'grid-cols-1 sm:grid-cols-2'
+                  : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4'
+              }`}
+            >
                 {portalData?.plans?.map((plan) => {
                   const isSelected = String(selectedPlan?._id || selectedPlan?.id) === String(plan._id || plan.id);
                   return (
@@ -248,42 +222,41 @@ export default function CaptivePortalPage() {
                       key={plan._id || plan.id}
                       onClick={() => setSelectedPlan(plan)}
                       aria-pressed={isSelected}
-                      className={`min-h-36 w-[82%] shrink-0 snap-start rounded-2xl border p-4 text-left transition-all duration-300 ease-out sm:w-[48%] md:w-[calc((100%-30px)/4)] ${
+                      className={`flex min-h-32 w-full flex-col justify-between rounded-2xl border p-4 text-left transition-all duration-300 ease-out ${
                         isSelected
-                          ? 'scale-[1.02] border-blue-400 bg-blue-500/15 text-white ring-2 ring-blue-500/40 shadow-lg shadow-blue-500/15'
+                          ? 'scale-[1.01] border-blue-400 bg-blue-500/15 text-white ring-2 ring-blue-500/40 shadow-lg shadow-blue-500/15'
                           : 'border-slate-800 bg-slate-900 text-slate-300 hover:-translate-y-0.5 hover:border-slate-600'
                       }`}
                     >
-                      <div className="flex h-full flex-col justify-between gap-4">
-                        <div className="space-y-2">
-                          <div className="font-bold text-sm flex items-center gap-2">
-                            <span>{plan.name}</span>
-                            {plan.badge && (
-                              <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-mono">
-                                {plan.badge}
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-xs text-slate-400 flex items-center gap-3">
-                            <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {plan.duration}</span>
-                            {plan.speed && (
-                              <span className="flex items-center gap-1"><Zap className="w-3.5 h-3.5" /> {plan.speed}</span>
-                            )}
-                          </div>
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="line-clamp-2 text-sm font-bold">{plan.name}</span>
+                          {plan.badge && (
+                            <span className="shrink-0 rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-medium text-blue-300">
+                              {plan.badge}
+                            </span>
+                          )}
                         </div>
-                        <div className="flex w-full items-center justify-between">
-                          <div className="text-base font-extrabold text-emerald-400">{plan.price} FCFA</div>
-                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors duration-300 ${
-                            isSelected ? 'border-blue-500 bg-blue-500' : 'border-slate-700'
-                          }`}>
-                            {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                          </div>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
+                          {plan.duration && (
+                            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {plan.duration}</span>
+                          )}
+                          {plan.speed && (
+                            <span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5" /> {plan.speed}</span>
+                          )}
                         </div>
+                      </div>
+                      <div className="mt-4 flex w-full items-center justify-between gap-2">
+                        <span className="text-base font-extrabold text-emerald-400">{plan.price} FCFA</span>
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${
+                          isSelected ? 'border-blue-500 bg-blue-500' : 'border-slate-700'
+                        }`}>
+                          {isSelected && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
+                        </span>
                       </div>
                     </button>
                   );
                 })}
-              </div>
             </div>
           </div>
 
